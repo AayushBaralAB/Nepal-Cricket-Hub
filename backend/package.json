@@ -1,0 +1,36 @@
+{
+  "name": "nepal-cricket-hub-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Nepal Cricket Hub — REST API + scheduled jobs",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "jobs": "tsx src/jobs/scheduler.ts",
+    "jobs:build": "tsc -p tsconfig.json && node dist/jobs/scheduler.js",
+    "typecheck": "tsc --noEmit",
+    "seed": "tsx src/scripts/seed.ts"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.4",
+    "axios": "^1.7.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "express-rate-limit": "^7.4.1",
+    "fast-xml-parser": "^4.5.0",
+    "helmet": "^8.0.0",
+    "node-cron": "^3.0.3",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.7.5",
+    "@types/node-cron": "^3.0.11",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.3"
+  }
+}
