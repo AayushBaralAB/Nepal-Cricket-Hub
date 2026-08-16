@@ -9,25 +9,25 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Nepal Cricket Hub brand palette — crimson + deep blue with saffron accent
+        // Nepal Cricket Hub brand palette — emerald match-day green + forest ink
         nch: {
-          50: '#fdf3f2',
-          100: '#fbe3e1',
-          200: '#f6c4c0',
-          300: '#ef9a93',
-          400: '#e66960',
-          500: '#dc2e27',
-          600: '#c2231d',
-          700: '#a11e19',
-          800: '#861c18',
-          900: '#701b17',
+          50: '#ecfdf5',
+          100: '#d1fae5',
+          200: '#a7f3d0',
+          300: '#6ee7b7',
+          400: '#34d399',
+          500: '#10b981',
+          600: '#059669',
+          700: '#047857',
+          800: '#065f46',
+          900: '#064e3b',
           navy: {
-            50: '#eef2ff',
-            100: '#e0e8ff',
-            500: '#1e3a8a',
-            700: '#17306e',
-            800: '#132852',
-            900: '#0d1b38',
+            50: '#f0fdfa',
+            100: '#ccfbf1',
+            500: '#115e59',
+            700: '#0f3d3a',
+            800: '#0d2f2c',
+            900: '#06221f',
           },
           saffron: {
             400: '#fbbf24',
@@ -80,18 +80,18 @@ const config: Config = {
         screens: { '2xl': '1280px' },
       },
       boxShadow: {
-        card: '0 1px 2px rgba(15,23,42,0.04), 0 4px 16px rgba(15,23,42,0.06)',
-        'card-hover': '0 2px 6px rgba(15,23,42,0.08), 0 18px 44px -14px rgba(13,27,56,0.22)',
-        soft: '0 8px 30px -12px rgba(13,27,56,0.18)',
-        'glow-red': '0 6px 22px -8px rgba(220,46,39,0.55)',
+        card: '0 1px 2px rgba(6,34,31,0.04), 0 8px 24px rgba(6,34,31,0.07)',
+        'card-hover': '0 4px 12px rgba(6,34,31,0.08), 0 20px 40px -16px rgba(5,150,105,0.28)',
+        soft: '0 10px 30px -12px rgba(5,150,105,0.22)',
+        'glow-red': '0 8px 24px -8px rgba(16,185,129,0.5)',
         'glow-saffron': '0 6px 22px -8px rgba(245,158,11,0.5)',
-        'glow-navy': '0 12px 44px -12px rgba(0,0,0,0.55)',
+        'glow-navy': '0 14px 44px -12px rgba(0,0,0,0.5)',
         'inner-top': 'inset 0 1px 0 rgba(255,255,255,0.06)',
       },
       backgroundImage: {
-        'brand-gradient': 'linear-gradient(135deg, #dc2e27 0%, #a11e19 55%, #0d1b38 100%)',
+        'brand-gradient': 'linear-gradient(135deg, #10b981 0%, #059669 55%, #06221f 100%)',
         'saffron-gradient': 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
-        'navy-gradient': 'linear-gradient(135deg, #132852 0%, #0d1b38 100%)',
+        'navy-gradient': 'linear-gradient(135deg, #0d2f2c 0%, #06221f 100%)',
       },
       transitionTimingFunction: {
         premium: 'cubic-bezier(0.22, 1, 0.36, 1)',

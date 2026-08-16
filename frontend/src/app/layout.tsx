@@ -1,16 +1,17 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter, Archivo } from 'next/font/google';
+import { Inter, Space_Grotesk } from 'next/font/google';
 import './globals.css';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { MobileBottomNav } from '@/components/layout/MobileBottomNav';
+import AnalyticsPing from '@/components/AnalyticsPing';
 import { SITE_URL } from '@/lib/api';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
-const archivo = Archivo({
+const archivo = Space_Grotesk({
   subsets: ['latin'],
   variable: '--font-archivo',
-  weight: ['500', '600', '700', '800', '900'],
+  weight: ['500', '600', '700'],
 });
 
 export const metadata: Metadata = {
@@ -46,7 +47,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#0d1b38',
+  themeColor: '#06221f',
 };
 
 export default function RootLayout({
@@ -60,6 +61,7 @@ export default function RootLayout({
         <main id="main">{children}</main>
         <Footer />
         <MobileBottomNav />
+        <AnalyticsPing />
       </body>
     </html>
   );

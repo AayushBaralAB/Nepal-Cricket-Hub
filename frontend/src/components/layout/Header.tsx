@@ -22,7 +22,7 @@ const UTILITY_LINKS = [
   { href: '/videos', label: 'Videos' },
   { href: '/series', label: 'Series' },
   { href: '/contact', label: 'Contact' },
-  { href: '/admin', label: 'Admin' },
+  { href: '/login', label: 'Admin' },
 ];
 
 function BreakingTicker() {
@@ -93,8 +93,11 @@ export function Header() {
     <header className="sticky top-0 z-50">
       <div className="hidden border-b border-white/10 bg-nch-navy-900/95 sm:block">
         <div className="container-nch flex h-9 items-center justify-between text-xs">
-          <p className="font-semibold uppercase tracking-[0.18em] text-slate-400">
-            Nepal Cricket Hub — All Nepal cricket, one place
+          <p className="inline-flex items-center gap-2 font-semibold uppercase tracking-[0.18em] text-slate-400">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-nch-500/20 px-2 py-0.5 font-black text-nch-300">
+              <span className="live-dot bg-nch-400" /> Live scores
+            </span>
+            All Nepal cricket, one place
           </p>
           <nav className="flex items-center gap-5" aria-label="Utility">
             {UTILITY_LINKS.map((link) => (
@@ -119,18 +122,13 @@ export function Header() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`relative rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${
+                className={`relative rounded-full px-3.5 py-2 text-sm font-semibold transition-colors ${
                   isActive(link.href)
-                    ? 'text-white'
+                    ? 'bg-nch-500/15 text-white'
                     : 'text-slate-300 hover:bg-white/5 hover:text-white'
                 }`}
               >
                 {link.label}
-                <span
-                  className={`absolute inset-x-3 -bottom-[9px] h-0.5 rounded-full bg-gradient-to-r from-nch-500 to-saffron-500 transition-all duration-300 ease-premium ${
-                    isActive(link.href) ? 'scale-x-100' : 'scale-x-0'
-                  }`}
-                />
               </Link>
             ))}
           </nav>

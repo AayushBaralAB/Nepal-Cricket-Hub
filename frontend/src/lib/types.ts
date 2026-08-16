@@ -273,3 +273,13 @@ export interface AdminSyncResult {
   ok: boolean;
   message: string;
 }
+
+export interface AdminAnalytics {
+  totalViews: number;
+  viewsToday: number;
+  viewsThisWeek: number;
+  viewsPerDay: Array<{ date: string; views: number }>;
+  topPages: Array<{ path: string; views: number }>;
+  topReferrers: Array<{ ref: string; views: number }>;
+  deviceBreakdown: Array<{ device: string; views: number }>;
+}

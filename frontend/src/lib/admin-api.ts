@@ -1,5 +1,5 @@
 import { API_BASE } from './api';
-import type { AdminHealth, AdminStats, AdminSyncResult } from './types';
+import type { AdminAnalytics, AdminHealth, AdminStats, AdminSyncResult } from './types';
 
 export const ADMIN_API = `${API_BASE}/admin`;
 const TOKEN_KEY = 'nch_admin_token';
@@ -64,4 +64,6 @@ export const adminApi = {
     adminRequest<Array<Record<string, unknown>>>('/matches', undefined, token),
   getApiLogs: (token?: string) =>
     adminRequest<Array<Record<string, unknown>>>('/api-logs', undefined, token),
+  getAnalytics: (token?: string) =>
+    adminRequest<AdminAnalytics>('/analytics', undefined, token),
 };

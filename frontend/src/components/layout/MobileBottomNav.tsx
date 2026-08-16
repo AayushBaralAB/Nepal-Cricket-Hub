@@ -19,7 +19,7 @@ const MORE = [
   { href: '/series/nepal-premier-league-2025', label: 'NPL 2025' },
   { href: '/news', label: 'News Categories' },
   { href: '/videos', label: 'Videos' },
-  { href: '/admin', label: 'Admin' },
+  { href: '/login', label: 'Admin' },
 ];
 
 function Icon({ d }: { d: string }) {

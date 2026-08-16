@@ -8,6 +8,7 @@ import { pointsTableService } from '../services/PointsTableService';
 import { statsService } from '../services/StatsService';
 import { newsService } from '../services/NewsService';
 import { db } from '../db';
+import { analytics, detectDevice } from '../services/AnalyticsService';
 
 const router = Router();
 
@@ -200,6 +201,19 @@ router.get('/search', wrap((req, res) => {
   const series = seriesService.list().filter((s) => s.name.toLowerCase().includes(q));
 
   json(res, { query: q, news, players, teams, matches, series });
+}));
+
+/* ------------------------------------------------------------ analytics */
+
+router.post('/analytics/page-view', wrap((req, res) => {
+  const ua = (req.headers['user-agent'] as string) ?? '';
+  analytics.record({
+    path: typeof req.body?.path === 'string' ? req.body.path : '/',
+    at: new Date(),
+    referer: typeof req.headers.referer === 'string' ? req.headers.referer : undefined,
+    device: detectDevice(ua),
+  });
+  res.status(204).end();
 }));
 
 /* --------------------------------------------------- site settings */

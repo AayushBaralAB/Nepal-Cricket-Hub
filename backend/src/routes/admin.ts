@@ -4,6 +4,7 @@ import { db } from '../db';
 import { config } from '../config';
 import { cricketData } from '../services/CricketDataService';
 import { newsService } from '../services/NewsService';
+import { analytics } from '../services/AnalyticsService';
 import { logger } from '../utils/logger';
 
 const router = Router();
@@ -111,6 +112,12 @@ router.get('/stats', async (_req, res) => {
     lastCricketUpdate: cricketData.lastSyncSuccessAt,
     lastNewsUpdate: newsService.lastFetchSuccessAt,
   });
+});
+
+/* -------------------------------------------------------- analytics */
+
+router.get('/analytics', (_req, res) => {
+  json(res, analytics.summary());
 });
 
 /* ------------------------------------------------------------- sync */

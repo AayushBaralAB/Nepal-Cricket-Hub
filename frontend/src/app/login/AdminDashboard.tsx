@@ -3,8 +3,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { adminApi, clearAdminToken, getAdminToken, setAdminToken } from '@/lib/admin-api';
+import { attemptLogin, isAdminAuthed, logout } from '@/lib/admin-auth';
 import { timeAgo, formatDateTime } from '@/lib/format';
-import type { AdminHealth, AdminStats } from '@/lib/types';
+import type { AdminAnalytics, AdminHealth, AdminStats } from '@/lib/types';
 
 type LoadState<T> = { data: T | null; error: string | null; loading: boolean };
 
@@ -53,15 +54,99 @@ function StatusRow({ label, value, good }: { label: string; value: string; good?
   );
 }
 
+function LoginForm() {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [authed, setAuthed] = useState(false);
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!attemptLogin(username.trim(), password)) {
+      setError('Invalid username or password.');
+      return;
+    }
+    setAuthed(true);
+  };
+
+  if (authed) return <AdminDashboard />;
+
+  return (
+    <div className="container-nch flex min-h-[60vh] items-center justify-center py-10">
+      <div className="w-full max-w-md">
+        <div className="card p-8">
+          <div className="mb-6 text-center">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-nch-600 to-nch-800 text-2xl font-black text-white shadow-glow-red">
+              NCH
+            </div>
+            <h1 className="font-display text-2xl font-black text-slate-900">Admin Login</h1>
+            <p className="mt-1 text-sm text-slate-500">
+              Sign in to access the Nepal Cricket Hub dashboard.
+            </p>
+          </div>
+
+          <form onSubmit={submit} className="space-y-4">
+            <div>
+              <label htmlFor="login-username" className="mb-1 block text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                Username
+              </label>
+              <input
+                id="login-username"
+                type="text"
+                autoComplete="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Enter username"
+                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 focus:border-nch-600 focus:outline-none focus:ring-2 focus:ring-nch-600/20"
+              />
+            </div>
+            <div>
+              <label htmlFor="login-password" className="mb-1 block text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                Password
+              </label>
+              <input
+                id="login-password"
+                type="password"
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter password"
+                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 focus:border-nch-600 focus:outline-none focus:ring-2 focus:ring-nch-600/20"
+              />
+            </div>
+            {error && (
+              <p className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-700">
+                {error}
+              </p>
+            )}
+            <button type="submit" className="btn-primary w-full">
+              Sign in
+            </button>
+          </form>
+
+          <p className="mt-5 text-center text-xs text-slate-400">
+            <Link href="/" className="font-semibold text-nch-600 hover:text-nch-700">← Back to home</Link>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function AdminDashboard() {
+  const [checked, setChecked] = useState(false);
+  const [authed, setAuthed] = useState(false);
   const [token, setToken] = useState('');
   const [hasToken, setHasToken] = useState(false);
   const [stats, setStats] = useState<LoadState<AdminStats>>({ data: null, error: null, loading: true });
   const [health, setHealth] = useState<LoadState<AdminHealth>>({ data: null, error: null, loading: true });
+  const [analytics, setAnalytics] = useState<LoadState<AdminAnalytics>>({ data: null, error: null, loading: true });
   const [syncing, setSyncing] = useState<null | 'cricket' | 'news'>(null);
   const [syncResult, setSyncResult] = useState<{ ok: boolean; message: string } | null>(null);
 
   useEffect(() => {
+    setAuthed(isAdminAuthed());
+    setChecked(true);
     setToken(getAdminToken());
     setHasToken(Boolean(getAdminToken()));
   }, []);
@@ -69,9 +154,11 @@ export function AdminDashboard() {
   const load = useCallback(async (t?: string) => {
     setStats((s) => ({ ...s, loading: true, error: null }));
     setHealth((h) => ({ ...h, loading: true, error: null }));
-    const [statsRes, healthRes] = await Promise.all([
+    setAnalytics((a) => ({ ...a, loading: true, error: null }));
+    const [statsRes, healthRes, analyticsRes] = await Promise.all([
       adminApi.getStats(t).catch((e: Error) => null),
       adminApi.getHealth(t).catch((e: Error) => null),
+      adminApi.getAnalytics(t).catch((e: Error) => null),
     ]);
     if (statsRes === null) {
       setStats((s) => ({ ...s, data: emptyStats, loading: false, error: 'Could not reach admin API' }));
@@ -79,11 +166,12 @@ export function AdminDashboard() {
       setStats({ data: statsRes, loading: false, error: null });
     }
     setHealth({ data: healthRes, loading: false, error: null });
+    setAnalytics({ data: analyticsRes, loading: false, error: null });
   }, []);
 
   useEffect(() => {
-    load();
-  }, [load]);
+    if (authed) load();
+  }, [authed, load]);
 
   const saveToken = () => {
     if (!token.trim()) {
@@ -111,6 +199,16 @@ export function AdminDashboard() {
     }
   };
 
+  if (!checked) {
+    return (
+      <div className="container-nch flex min-h-[60vh] items-center justify-center">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-nch-600" />
+    </div>
+  );
+}
+
+  if (!authed) return <LoginForm />;
+
   const dbConnected = stats.data?.dbConnected ?? false;
   const apiErrors = stats.data?.apiErrors ?? [];
 
@@ -122,11 +220,24 @@ export function AdminDashboard() {
         <span>Admin Dashboard</span>
       </nav>
 
-      <div>
-        <h1 className="font-display text-2xl font-black text-slate-900">Admin Dashboard</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          System health, live stats and content sync for Nepal Cricket Hub.
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="font-display text-2xl font-black text-slate-900">Admin Dashboard</h1>
+          <p className="mt-1 text-sm text-slate-500">
+            System health, live stats and content sync for Nepal Cricket Hub.
+          </p>
+        </div>
+        <button
+          onClick={() => {
+            logout();
+            clearAdminToken();
+            setAuthed(false);
+            setHasToken(false);
+          }}
+          className="btn-ghost text-xs"
+        >
+          Log out
+        </button>
       </div>
 
       <div className="card p-4">
@@ -282,6 +393,119 @@ export function AdminDashboard() {
               </li>
             ))}
           </ul>
+        )}
+      </section>
+
+      <section className="card p-5">
+        <h2 className="section-title !mb-3">Analytics</h2>
+        {analytics.error && !analytics.data && (
+          <p className="text-sm text-slate-500">
+            Analytics requires a Supabase admin token (protected endpoint). Save a valid token above to view
+            page-view analytics.
+          </p>
+        )}
+        {analytics.loading && !analytics.data ? (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="card h-20 animate-pulse p-4" />
+            ))}
+          </div>
+        ) : (
+          analytics.data && (
+            <>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
+                <StatCard label="Total views" value={analytics.data.totalViews} accent="text-nch-600" />
+                <StatCard label="Today" value={analytics.data.viewsToday} />
+                <StatCard label="This week" value={analytics.data.viewsThisWeek} />
+              </div>
+
+              <div className="mt-6 grid gap-6 lg:grid-cols-2">
+                <div>
+                  <h3 className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-500">
+                    Views — last 14 days
+                  </h3>
+                  <div className="flex h-40 items-end gap-1.5 rounded-lg bg-slate-50 p-3">
+                    {(() => {
+                      const max = Math.max(...analytics.data!.viewsPerDay.map((d) => d.views), 1);
+                      return analytics.data!.viewsPerDay.map((d) => (
+                        <div key={d.date} className="group relative flex h-full flex-1 flex-col justify-end">
+                          <div
+                            className="w-full rounded-t bg-gradient-to-t from-nch-700 to-nch-500 transition-all"
+                            style={{ height: `${Math.max((d.views / max) * 100, d.views > 0 ? 4 : 2)}%` }}
+                            title={`${d.date}: ${d.views} views`}
+                          />
+                        </div>
+                      ));
+                    })()}
+                  </div>
+                  <div className="mt-1 flex justify-between px-1 text-[10px] text-slate-400">
+                    <span>{analytics.data?.viewsPerDay[0]?.date?.slice(5)}</span>
+                    <span>{analytics.data?.viewsPerDay[analytics.data?.viewsPerDay.length - 1]?.date?.slice(5)}</span>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-500">Device breakdown</h3>
+                  {analytics.data?.deviceBreakdown.length === 0 ? (
+                    <p className="text-sm text-slate-500">No device data yet.</p>
+                  ) : (
+                    <ul className="space-y-2">
+                      {analytics.data?.deviceBreakdown.map((d) => {
+                        const pct = analytics.data!.totalViews > 0
+                          ? Math.round((d.views / analytics.data!.totalViews) * 100)
+                          : 0;
+                        return (
+                          <li key={d.device} className="text-sm">
+                            <div className="flex items-center justify-between">
+                              <span className="capitalize text-slate-700">{d.device}</span>
+                              <span className="font-semibold tabular-nums text-slate-800">{pct}% · {d.views}</span>
+                            </div>
+                            <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-slate-100">
+                              <div className="h-full rounded-full bg-nch-600" style={{ width: `${pct}%` }} />
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </div>
+              </div>
+
+              <div className="mt-6 grid gap-6 lg:grid-cols-2">
+                <div>
+                  <h3 className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-500">Top pages</h3>
+                  {analytics.data?.topPages.length === 0 ? (
+                    <p className="text-sm text-slate-500">No page views recorded yet.</p>
+                  ) : (
+                    <ul className="divide-y divide-slate-100">
+                      {analytics.data?.topPages.map((p) => (
+                        <li key={p.path} className="flex items-center justify-between gap-4 py-2 text-sm">
+                          <span className="min-w-0 flex-1 truncate font-medium text-slate-700">{p.path}</span>
+                          <span className="shrink-0 tabular-nums text-slate-500">{p.views}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
+                <div>
+                  <h3 className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-500">Top referrers</h3>
+                  {analytics.data?.topReferrers.length === 0 ? (
+                    <p className="text-sm text-slate-500">No referral data yet.</p>
+                  ) : (
+                    <ul className="divide-y divide-slate-100">
+                      {analytics.data?.topReferrers.map((r) => (
+                        <li key={r.ref} className="flex items-center justify-between gap-4 py-2 text-sm">
+                          <span className="min-w-0 flex-1 truncate font-medium text-slate-700">{r.ref}</span>
+                          <span className="shrink-0 tabular-nums text-slate-500">{r.views}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </div>
+            </>
+          )
         )}
       </section>
     </div>

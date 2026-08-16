@@ -14,15 +14,15 @@ export function LogoMark({ size = 40 }: { size?: number }) {
           <stop offset="100%" stopColor="#cbd5e1" />
         </linearGradient>
       </defs>
-      <circle cx="24" cy="24" r="23" fill="url(#ballGrad)" stroke="#0d1b38" strokeWidth="2" />
+      <circle cx="24" cy="24" r="23" fill="url(#ballGrad)" stroke="#06221f" strokeWidth="2" />
       {/* seam */}
       <path d="M24 3 C 18 10, 18 38, 24 45" stroke="#64748b" strokeWidth="1.5" fill="none" />
       <path d="M24 3 C 30 10, 30 38, 24 45" stroke="#64748b" strokeWidth="1.5" fill="none" />
       <path d="M24 3 C 21.5 20, 21.5 28, 24 45" stroke="#64748b" strokeWidth="0.8" fill="none" />
       <path d="M24 3 C 26.5 20, 26.5 28, 24 45" stroke="#64748b" strokeWidth="0.8" fill="none" />
       {/* himalaya */}
-      <path d="M8 30 L17 18 L21 24 L25 16 L33 28 L29 30 L21 24 L18 30 Z" fill="url(#mountainGrad)" stroke="#0d1b38" strokeWidth="1" />
-      <path d="M25 16 L29 21.5 L28 22.5 L25 19.5 Z" fill="#dc2e27" />
+      <path d="M8 30 L17 18 L21 24 L25 16 L33 28 L29 30 L21 24 L18 30 Z" fill="url(#mountainGrad)" stroke="#06221f" strokeWidth="1" />
+      <path d="M25 16 L29 21.5 L28 22.5 L25 19.5 Z" fill="#10b981" />
       <circle cx="24" cy="7.5" r="1.4" fill="#f59e0b" />
     </svg>
   );

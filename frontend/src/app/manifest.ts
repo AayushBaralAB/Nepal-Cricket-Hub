@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: 'All Nepal cricket in one hub — live scores, news, NPL and statistics.',
     start_url: '/',
     display: 'standalone',
-    background_color: '#0d1b38',
-    theme_color: '#0d1b38',
+    background_color: '#06221f',
+    theme_color: '#06221f',
     icons: [
       { src: '/icon.svg', sizes: 'any', type: 'image/svg+xml' },
       { src: '/icon-192.png', sizes: '192x192', type: 'image/png' },
