@@ -1,4 +1,4 @@
-# Nepal Cricket Hub
+# CricketHub
 
 A modern, professional cricket platform focused on Nepal cricket — live scores, fixtures, results,
 automatic news aggregation, player statistics, NPL coverage, and points tables.

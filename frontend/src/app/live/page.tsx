@@ -32,7 +32,7 @@ export default async function LivePage() {
 
       <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-xs text-slate-500">
         Score updates are automated from external data sources and may be delayed.
-        Check the Nepal Cricket Hub live centre for the most recent ball-by-ball coverage.
+        Check the CricketHub live centre for the most recent ball-by-ball coverage.
       </div>
     </div>
   );

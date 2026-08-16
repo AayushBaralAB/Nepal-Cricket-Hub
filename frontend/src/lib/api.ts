@@ -15,7 +15,7 @@ import type {
 export const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:4000/api';
 export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? 'https://nepalcrickethub.com';
+  process.env.NEXT_PUBLIC_SITE_URL ?? 'https://crickethub.com';
 
 export class ApiError extends Error {
   status: number;

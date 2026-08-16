@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 export function LogoMark({ size = 40 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" role="img" aria-label="Nepal Cricket Hub logo">
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" role="img" aria-label="CricketHub logo">
       {/* Stylised cricket ball with a Himalayan peak */}
       <defs>
         <linearGradient id="ballGrad" x1="0" y1="0" x2="1" y2="1">
@@ -30,12 +30,12 @@ export function LogoMark({ size = 40 }: { size?: number }) {
 
 export function Logo({ compact = false }: { compact?: boolean }) {
   return (
-    <Link href="/" className="flex items-center gap-2.5" aria-label="Nepal Cricket Hub — home">
+    <Link href="/" className="flex items-center gap-2.5" aria-label="CricketHub — home">
       <LogoMark size={compact ? 34 : 40} />
       {!compact && (
         <span className="flex flex-col leading-none">
           <span className="font-display text-lg font-black tracking-tight text-white sm:text-xl">
-            Nepal Cricket<span className="text-nch-500"> Hub</span>
+            CricketHub
           </span>
           <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
             All Nepal cricket, one hub

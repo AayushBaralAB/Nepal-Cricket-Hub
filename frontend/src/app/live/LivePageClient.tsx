@@ -54,7 +54,7 @@ export function LivePageClient({ initial }: { initial: CricketMatch[] }) {
           <span className="text-4xl">🏏</span>
           <p className="font-display text-lg font-bold text-slate-800">No live matches right now</p>
           <p className="text-sm text-slate-500">
-            Check upcoming fixtures for the next Nepal Cricket Hub match.
+            Check upcoming fixtures for the next CricketHub match.
           </p>
           <a href="/matches?status=upcoming" className="btn-primary">View Upcoming</a>
         </div>

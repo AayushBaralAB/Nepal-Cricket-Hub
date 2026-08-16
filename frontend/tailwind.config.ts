@@ -9,7 +9,7 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Nepal Cricket Hub brand palette — emerald match-day green + forest ink
+        // CricketHub brand palette — emerald match-day green + forest ink
         nch: {
           50: '#ecfdf5',
           100: '#d1fae5',

@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 
 export const metadata: Metadata = {
-  title: 'Contact Nepal Cricket Hub',
-  description: 'Get in touch with Nepal Cricket Hub — feedback, corrections, and partnership enquiries.',
+  title: 'Contact CricketHub',
+  description: 'Get in touch with CricketHub — feedback, corrections, and partnership enquiries.',
 };
 
 export default function ContactPage() {
@@ -19,10 +19,10 @@ export default function ContactPage() {
         </p>
 
         <a
-          href="mailto:hello@nepalcrickethub.com?subject=Nepal%20Cricket%20Hub%20Enquiry"
+          href="mailto:hello@crickethub.com?subject=CricketHub%20Enquiry"
           className="btn-primary inline-flex"
         >
-          Email us at hello@nepalcrickethub.com
+          Email us at hello@crickethub.com
         </a>
 
         <div className="grid gap-4 border-t border-slate-100 pt-6 sm:grid-cols-2">

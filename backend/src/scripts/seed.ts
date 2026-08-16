@@ -152,11 +152,11 @@ const MATCHES: SeedMatch[] = [
 ];
 
 const NEWS = [
-  { title: 'Janakpur Bolts edge Biratnagar Kings in NPL thriller', slug: 'janakpur-bolts-edge-biratnagar-kings-in-npl-thriller', summary: 'A last-over finish at Kirtipur kept the NPL title race alive as Janakpur Bolts held their nerve to seal a dramatic win.', category: 'NPL', tags: ['NPL', 'Janakpur Bolts', 'Biratnagar Kings'], sourceName: 'Nepal Cricket Hub', sourceUrl: 'https://nepalcrickethub.com/news/janakpur-bolts-edge-biratnagar-kings-in-npl-thriller', guid: 'seed-001', breaking: true, featured: true, offset: -2 * 3600 * 1000 },
-  { title: 'Rohit Paudel climbs Nepal run-charts with record-breaking series', slug: 'rohit-paudel-climbs-nepal-run-charts-with-record-breaking-series', summary: "The Nepal captain produced a Player of the Series display, underlining his status as the team's batting bedrock.", category: 'Nepal Cricket', tags: ['Nepal', 'Rohit Paudel'], sourceName: 'Nepal Cricket Hub', sourceUrl: 'https://nepalcrickethub.com/news/rohit-paudel-climbs-nepal-run-charts-with-record-breaking-series', guid: 'seed-002', breaking: false, featured: true, offset: -5 * 3600 * 1000 },
-  { title: 'Sandeep Lamichhane returns to T20 franchise circuit', slug: 'sandeep-lamichhane-returns-to-t20-franchise-circuit', summary: "Nepal's most decorated wrist-spinner has rejoined the franchise circuit, adding another chapter to a storied career.", category: 'Player News', tags: ['Players', 'Sandeep Lamichhane'], sourceName: 'Nepal Cricket Hub', sourceUrl: 'https://nepalcrickethub.com/news/sandeep-lamichhane-returns-to-t20-franchise-circuit', guid: 'seed-003', breaking: false, featured: false, offset: -24 * 3600 * 1000 },
-  { title: 'Nepal U19 set sights on ACC U19 Asia Cup', slug: 'nepal-u19-set-sights-on-acc-u19-asia-cup', summary: 'A young squad has been named as Nepal prepare for their U19 Asia Cup campaign later this year.', category: 'U19 Cricket', tags: ['U19', 'Nepal U19'], sourceName: 'Nepal Cricket Hub', sourceUrl: 'https://nepalcrickethub.com/news/nepal-u19-set-sights-on-acc-u19-asia-cup', guid: 'seed-004', breaking: false, featured: false, offset: -2 * 24 * 3600 * 1000 },
-  { title: 'Nepal Women gear up for T20I series against Zimbabwe', slug: 'nepal-women-gear-up-for-t20i-series-against-zimbabwe', summary: "The national women's side will host Zimbabwe in a three-match T20I series in Kirtipur next month.", category: "Women's Cricket", tags: ['Nepal Women', "Women's Cricket"], sourceName: 'Nepal Cricket Hub', sourceUrl: 'https://nepalcrickethub.com/news/nepal-women-gear-up-for-t20i-series-against-zimbabwe', guid: 'seed-005', breaking: false, featured: false, offset: -3 * 24 * 3600 * 1000 },
+  { title: 'Janakpur Bolts edge Biratnagar Kings in NPL thriller', slug: 'janakpur-bolts-edge-biratnagar-kings-in-npl-thriller', summary: 'A last-over finish at Kirtipur kept the NPL title race alive as Janakpur Bolts held their nerve to seal a dramatic win.', category: 'NPL', tags: ['NPL', 'Janakpur Bolts', 'Biratnagar Kings'], sourceName: 'CricketHub', sourceUrl: 'https://crickethub.com/news/janakpur-bolts-edge-biratnagar-kings-in-npl-thriller', guid: 'seed-001', breaking: true, featured: true, offset: -2 * 3600 * 1000 },
+  { title: 'Rohit Paudel climbs Nepal run-charts with record-breaking series', slug: 'rohit-paudel-climbs-nepal-run-charts-with-record-breaking-series', summary: "The Nepal captain produced a Player of the Series display, underlining his status as the team's batting bedrock.", category: 'Nepal Cricket', tags: ['Nepal', 'Rohit Paudel'], sourceName: 'CricketHub', sourceUrl: 'https://crickethub.com/news/rohit-paudel-climbs-nepal-run-charts-with-record-breaking-series', guid: 'seed-002', breaking: false, featured: true, offset: -5 * 3600 * 1000 },
+  { title: 'Sandeep Lamichhane returns to T20 franchise circuit', slug: 'sandeep-lamichhane-returns-to-t20-franchise-circuit', summary: "Nepal's most decorated wrist-spinner has rejoined the franchise circuit, adding another chapter to a storied career.", category: 'Player News', tags: ['Players', 'Sandeep Lamichhane'], sourceName: 'CricketHub', sourceUrl: 'https://crickethub.com/news/sandeep-lamichhane-returns-to-t20-franchise-circuit', guid: 'seed-003', breaking: false, featured: false, offset: -24 * 3600 * 1000 },
+  { title: 'Nepal U19 set sights on ACC U19 Asia Cup', slug: 'nepal-u19-set-sights-on-acc-u19-asia-cup', summary: 'A young squad has been named as Nepal prepare for their U19 Asia Cup campaign later this year.', category: 'U19 Cricket', tags: ['U19', 'Nepal U19'], sourceName: 'CricketHub', sourceUrl: 'https://crickethub.com/news/nepal-u19-set-sights-on-acc-u19-asia-cup', guid: 'seed-004', breaking: false, featured: false, offset: -2 * 24 * 3600 * 1000 },
+  { title: 'Nepal Women gear up for T20I series against Zimbabwe', slug: 'nepal-women-gear-up-for-t20i-series-against-zimbabwe', summary: "The national women's side will host Zimbabwe in a three-match T20I series in Kirtipur next month.", category: "Women's Cricket", tags: ['Nepal Women', "Women's Cricket"], sourceName: 'CricketHub', sourceUrl: 'https://crickethub.com/news/nepal-women-gear-up-for-t20i-series-against-zimbabwe', guid: 'seed-005', breaking: false, featured: false, offset: -3 * 24 * 3600 * 1000 },
 ];
 
 const VIDEOS = [
@@ -166,8 +166,8 @@ const VIDEOS = [
 ];
 
 const ADS = [
-  { name: 'Home top banner', slot: 'home_top', format: 'leaderboard', type: 'image', imageUrl: 'https://placehold.co/728x90/0f172a/ffffff?text=Advertise+with+Nepal+Cricket+Hub', linkUrl: 'https://nepalcrickethub.com/advertise' },
-  { name: 'Sidebar skyscraper', slot: 'sidebar', format: 'skyscraper', type: 'image', imageUrl: 'https://placehold.co/300x600/0f172a/ffffff?text=Advertise+Here', linkUrl: 'https://nepalcrickethub.com/advertise' },
+  { name: 'Home top banner', slot: 'home_top', format: 'leaderboard', type: 'image', imageUrl: 'https://placehold.co/728x90/0f172a/ffffff?text=Advertise+with+CricketHub', linkUrl: 'https://crickethub.com/advertise' },
+  { name: 'Sidebar skyscraper', slot: 'sidebar', format: 'skyscraper', type: 'image', imageUrl: 'https://placehold.co/300x600/0f172a/ffffff?text=Advertise+Here', linkUrl: 'https://crickethub.com/advertise' },
 ];
 
 async function seed() {
@@ -183,8 +183,8 @@ async function seed() {
     {
       $set: {
         value: {
-          name: 'Nepal Cricket Hub',
-          domain: 'nepalcrickethub.com',
+          name: 'CricketHub',
+          domain: 'crickethub.com',
           tagline: 'All Nepal Cricket. One Hub.',
           description: 'Live scores, fixtures, results, news and stats for Nepal cricket, the Nepal Premier League and Nepali players around the world.',
         },
@@ -332,10 +332,10 @@ async function seed() {
 
   // News sources
   await db.collection('news_sources').updateOne(
-    { url: 'internal://nepalcrickethub' },
+    { url: 'internal://crickethub' },
     {
       $setOnInsert: {
-        name: 'Nepal Cricket Hub (internal)', url: 'internal://nepalcrickethub',
+        name: 'CricketHub (internal)', url: 'internal://crickethub',
         type: 'rss', category: 'Nepal Cricket', enabled: true, createdAt: nowIso(),
       },
     },

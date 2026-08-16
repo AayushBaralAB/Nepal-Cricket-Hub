@@ -242,9 +242,9 @@ router.post('/analytics/page-view', wrap((req, res) => {
 router.get('/site', wrap(async (_req, res) => {
   if (!db.isConfigured) {
     return json(res, {
-      name: 'Nepal Cricket Hub',
+      name: 'CricketHub',
       tagline: 'All Nepal Cricket. One Hub.',
-      domain: 'nepalcrickethub.com',
+      domain: 'crickethub.com',
     });
   }
   const row = await db.collection('site_settings').findOne({ key: 'site' });

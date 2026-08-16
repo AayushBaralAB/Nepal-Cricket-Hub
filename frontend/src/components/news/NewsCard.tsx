@@ -34,7 +34,7 @@ export function NewsCard({ item, featured = false }: { item: NewsItem; featured?
           <p className="line-clamp-2 text-sm text-slate-500">{item.summary}</p>
           <div className="mt-3 flex items-center gap-2 text-xs text-slate-400">
             <span className="h-1 w-1 rounded-full bg-nch-500" />
-            <span className="font-semibold text-slate-600">{item.sourceName ?? 'Nepal Cricket Hub'}</span>
+            <span className="font-semibold text-slate-600">{item.sourceName ?? 'CricketHub'}</span>
             <span>·</span>
             <span>{timeAgo(item.publishedAt)}</span>
           </div>

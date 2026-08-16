@@ -3,7 +3,7 @@ import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 
 export const metadata: Metadata = {
   title: 'Disclaimer',
-  description: 'Nepal Cricket Hub disclaimer — accuracy of scores, news attribution and broadcast rights.',
+  description: 'CricketHub disclaimer — accuracy of scores, news attribution and broadcast rights.',
 };
 
 export default function DisclaimerPage() {
@@ -14,7 +14,7 @@ export default function DisclaimerPage() {
         <h1 className="font-display text-2xl font-black text-slate-900">Disclaimer</h1>
         <div className="space-y-4 text-sm leading-relaxed text-slate-600">
           <p>
-            Nepal Cricket Hub is an independent, fan-run website and is not affiliated with, or
+            CricketHub is an independent, fan-run website and is not affiliated with, or
             endorsed by, the Cricket Association of Nepal (CAN), the International Cricket Council
             (ICC), any national governing body, broadcaster or the Nepal Premier League (NPL)
             franchises.

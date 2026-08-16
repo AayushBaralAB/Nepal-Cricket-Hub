@@ -3,7 +3,7 @@ import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 
 export const metadata: Metadata = {
   title: 'Terms of Use',
-  description: 'Nepal Cricket Hub terms of use — rules for using our site and content.',
+  description: 'CricketHub terms of use — rules for using our site and content.',
 };
 
 export default function TermsPage() {
@@ -16,7 +16,7 @@ export default function TermsPage() {
 
         <Section title="1. Acceptance of terms">
           <p>
-            By using Nepal Cricket Hub you agree to these terms. If you do not agree, please do not
+            By using CricketHub you agree to these terms. If you do not agree, please do not
             use the site.
           </p>
         </Section>
@@ -38,7 +38,7 @@ export default function TermsPage() {
 
         <Section title="4. No betting or gambling">
           <p>
-            Nepal Cricket Hub does not host or promote betting odds, gambling or wagering services.
+            CricketHub does not host or promote betting odds, gambling or wagering services.
             Third-party ad networks may show ads; we do not endorse any advertiser&apos;s services.
           </p>
         </Section>

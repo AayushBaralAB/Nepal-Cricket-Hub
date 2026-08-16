@@ -202,7 +202,7 @@ export class NewsService {
   private async fetchSource(source: NewsSourceConfig): Promise<NewsItem[]> {
     const res = await axios.get(source.url, {
       timeout: 15000,
-      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; NepalCricketHub/1.0; +https://nepalcrickethub.com)' },
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; CricketHub/1.0; +https://crickethub.com)' },
     });
 
     if (source.type === 'api' && !/^https?:\/\/.*\.xml/i.test(source.url)) {

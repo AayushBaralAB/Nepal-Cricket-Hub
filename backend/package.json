@@ -2,7 +2,7 @@
   "name": "nepal-cricket-hub-backend",
   "version": "1.0.0",
   "private": true,
-  "description": "Nepal Cricket Hub — REST API + scheduled jobs",
+  "description": "CricketHub — REST API + scheduled jobs",
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
@@ -11,7 +11,8 @@
     "jobs": "tsx src/jobs/scheduler.ts",
     "jobs:build": "tsc -p tsconfig.json && node dist/jobs/scheduler.js",
     "typecheck": "tsc --noEmit",
-    "seed": "tsx src/scripts/seed.ts"
+    "seed": "tsx src/scripts/seed.ts",
+    "import:npl": "tsx src/scripts/import-npl.ts"
   },
   "dependencies": {
     "axios": "^1.7.7",

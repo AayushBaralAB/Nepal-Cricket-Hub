@@ -30,7 +30,7 @@ import { LiveBadge } from '@/components/ui/Badges';
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: 'Nepal Cricket Hub — Live Scores, News & Stats',
+  title: 'CricketHub — Live Scores, News & Stats',
   description:
     'Live scores, fixtures, results, automatic Nepal cricket news, NPL coverage, player statistics and points tables — all Nepal cricket in one hub.',
   openGraph: {
@@ -76,7 +76,7 @@ export default async function HomePage() {
         aria-label="Welcome"
         className="animate-fade-in-up py-10 text-center sm:py-14"
       >
-        <span className="overline-label !justify-center">Nepal Cricket Hub</span>
+        <span className="overline-label !justify-center">CricketHub</span>
 
         <h1 className="mx-auto max-w-3xl font-display text-4xl font-black leading-[1.05] tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
           Nepal&apos;s Cricket.

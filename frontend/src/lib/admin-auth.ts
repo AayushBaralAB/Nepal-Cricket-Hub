@@ -1,7 +1,7 @@
 const AUTH_KEY = 'nch_admin_authed';
 
-const ADMIN_USERNAME = process.env.NEXT_PUBLIC_ADMIN_USERNAME ?? 'nepalcrickethub.com';
-const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD ?? 'nepalcrickethub.com';
+const ADMIN_USERNAME = process.env.NEXT_PUBLIC_ADMIN_USERNAME ?? 'crickethub.com';
+const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD ?? 'crickethub.com';
 
 export function isAdminAuthed(): boolean {
   if (typeof window === 'undefined') return false;

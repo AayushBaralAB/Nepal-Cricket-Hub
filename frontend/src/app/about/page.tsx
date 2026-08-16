@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 
 export const metadata: Metadata = {
-  title: 'About Nepal Cricket Hub',
-  description: 'Nepal Cricket Hub — Nepal\'s home for live cricket scores, news and statistics.',
+  title: 'About CricketHub',
+  description: 'CricketHub — Nepal\'s home for live cricket scores, news and statistics.',
 };
 
 export default function AboutPage() {
@@ -11,10 +11,10 @@ export default function AboutPage() {
     <div className="container-nch mx-auto max-w-3xl space-y-6 py-8">
       <Breadcrumbs items={[{ label: 'About' }]} />
       <div className="card space-y-5 p-6 sm:p-8">
-        <h1 className="font-display text-2xl font-black text-slate-900">About Nepal Cricket Hub</h1>
+        <h1 className="font-display text-2xl font-black text-slate-900">About CricketHub</h1>
         <div className="space-y-4 text-sm leading-relaxed text-slate-600">
           <p>
-            Nepal Cricket Hub (NCH) is a fan-run, non-commercial resource dedicated to Nepal&apos;s
+            CricketHub (NCH) is a fan-run, non-commercial resource dedicated to Nepal&apos;s
             national cricket team, the Nepal Premier League (NPL), women&apos;s cricket, U19 teams and
             domestic cricket.
           </p>

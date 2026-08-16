@@ -81,7 +81,7 @@ function LoginForm() {
             </div>
             <h1 className="font-display text-2xl font-black text-slate-900">Admin Login</h1>
             <p className="mt-1 text-sm text-slate-500">
-              Sign in to access the Nepal Cricket Hub dashboard.
+              Sign in to access the CricketHub dashboard.
             </p>
           </div>
 
@@ -224,7 +224,7 @@ export function AdminDashboard() {
         <div>
           <h1 className="font-display text-2xl font-black text-slate-900">Admin Dashboard</h1>
           <p className="mt-1 text-sm text-slate-500">
-            System health, live stats and content sync for Nepal Cricket Hub.
+            System health, live stats and content sync for CricketHub.
           </p>
         </div>
         <button

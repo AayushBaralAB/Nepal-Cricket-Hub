@@ -2,7 +2,7 @@ import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Nepal Cricket Hub',
+    name: 'CricketHub',
     short_name: 'NCH',
     description: 'All Nepal cricket in one hub — live scores, news, NPL and statistics.',
     start_url: '/',

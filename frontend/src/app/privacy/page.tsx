@@ -3,7 +3,7 @@ import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy',
-  description: 'Nepal Cricket Hub privacy policy — how we handle data, cookies and third-party services.',
+  description: 'CricketHub privacy policy — how we handle data, cookies and third-party services.',
 };
 
 export default function PrivacyPage() {
@@ -16,7 +16,7 @@ export default function PrivacyPage() {
 
         <Section title="1. Information we collect">
           <p>
-            Nepal Cricket Hub is a fan-run sports information site. We do not require accounts or
+            CricketHub is a fan-run sports information site. We do not require accounts or
             registration, and we do not collect names, emails or personal data through browsing.
             Like most sites, standard server logs record anonymous technical data such as IP
             address, browser type and pages viewed for security and performance analysis.
@@ -56,7 +56,7 @@ export default function PrivacyPage() {
 
         <Section title="6. Contact">
           <p>
-            Questions about this policy can be sent to hello@nepalcrickethub.com.
+            Questions about this policy can be sent to hello@crickethub.com.
           </p>
         </Section>
       </article>

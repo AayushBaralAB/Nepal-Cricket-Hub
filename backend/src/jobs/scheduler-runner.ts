@@ -4,7 +4,7 @@ import { assertConfig } from '../config';
 
 assertConfig();
 
-console.log(`[jobs] Nepal Cricket Hub scheduler running in ${config.env} mode`);
+console.log(`[jobs] CricketHub scheduler running in ${config.env} mode`);
 console.log(`[jobs] Cricket provider: ${config.cricket.provider}`);
 
 startScheduler();

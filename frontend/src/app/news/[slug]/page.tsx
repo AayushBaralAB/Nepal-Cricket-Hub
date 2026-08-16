@@ -50,8 +50,8 @@ export default async function ArticlePage({
     datePublished: item.publishedAt,
     description: item.summary,
     image: item.imageUrl ? [item.imageUrl] : undefined,
-    author: { '@type': 'Organization', name: item.sourceName ?? 'Nepal Cricket Hub' },
-    publisher: { '@type': 'Organization', name: 'Nepal Cricket Hub', url: SITE_URL },
+    author: { '@type': 'Organization', name: item.sourceName ?? 'CricketHub' },
+    publisher: { '@type': 'Organization', name: 'CricketHub', url: SITE_URL },
     mainEntityOfPage: `${SITE_URL}/news/${item.slug}`,
   };
 
@@ -98,7 +98,7 @@ export default async function ArticlePage({
           )}
 
           <p className="mt-6 text-sm leading-relaxed text-slate-600">
-            This story is aggregated by Nepal Cricket Hub for news coverage. The summary above is a
+            This story is aggregated by CricketHub for news coverage. The summary above is a
             permitted excerpt; for the full story, visit the original publication.
           </p>
 

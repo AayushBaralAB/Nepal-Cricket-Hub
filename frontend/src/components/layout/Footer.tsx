@@ -18,7 +18,7 @@ const GROUPS: Array<{ label: string; links: Array<{ href: string; label: string 
   {
     label: 'Nepal',
     links: [
-      { href: '/news', label: 'Nepal Cricket News' },
+      { href: '/news', label: 'CricketHub News' },
       { href: '/npl', label: 'Nepal Premier League' },
       { href: '/teams/nepal', label: 'Nepal Men' },
       { href: '/teams/nepal-women', label: 'Nepal Women' },
@@ -78,10 +78,10 @@ export function Footer() {
             <LogoMark size={40} />
             <span className="flex flex-col leading-none">
               <span className="font-display text-lg font-black text-white">
-                Nepal Cricket<span className="text-nch-500"> Hub</span>
+                CricketHub<span className="text-nch-500"> Hub</span>
               </span>
               <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
-                nepalcrickethub.com
+                crickethub.com
               </span>
             </span>
           </div>
@@ -135,7 +135,7 @@ export function Footer() {
 
       <div className="relative border-t border-white/10">
         <div className="container-nch flex flex-col items-center justify-between gap-3 py-5 text-xs text-slate-500 sm:flex-row">
-          <p>© {year} Nepal Cricket Hub — nepalcrickethub.com. All rights reserved.</p>
+          <p>© {year} CricketHub Hub — crickethub.com. All rights reserved.</p>
           <p className="flex items-center gap-4">
             <Link href="/news" className="transition-colors hover:text-slate-300">News</Link>
             <Link href="/matches" className="transition-colors hover:text-slate-300">Matches</Link>

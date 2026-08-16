@@ -17,8 +17,8 @@ const archivo = Space_Grotesk({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'Nepal Cricket Hub — Live Scores, News & Stats',
-    template: '%s | Nepal Cricket Hub',
+    default: 'CricketHub — Live Scores, News & Stats',
+    template: '%s | CricketHub',
   },
   description:
     'All Nepal cricket in one hub — live scores, fixtures, results, automatic Nepal cricket news, NPL coverage, player statistics and points tables.',
@@ -29,15 +29,15 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     type: 'website',
-    siteName: 'Nepal Cricket Hub',
-    title: 'Nepal Cricket Hub',
+    siteName: 'CricketHub',
+    title: 'CricketHub',
     description:
       'All Nepal cricket in one hub — live scores, fixtures, results, automatic Nepal cricket news, NPL coverage, player statistics and points tables.',
     url: SITE_URL,
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Nepal Cricket Hub',
+    title: 'CricketHub',
     description:
       'All Nepal cricket in one hub — live scores, fixtures, results, automatic Nepal cricket news and NPL coverage.',
   },
