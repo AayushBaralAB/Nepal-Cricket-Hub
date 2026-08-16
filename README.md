@@ -5,8 +5,8 @@ automatic news aggregation, player statistics, NPL coverage, and points tables.
 
 - **Frontend:** Next.js (App Router), React, TypeScript, Tailwind CSS
 - **Backend:** Node.js + Express (REST API) with scheduled jobs
-- **Database:** Supabase (PostgreSQL)
-- **Auth:** Supabase Auth
+- **Database:** MongoDB (official `mongodb` driver)
+- **Auth:** Admin bearer token (server-side env `ADMIN_API_TOKEN`)
 - **Scheduling:** node-cron
 
 ## Repository layout
@@ -14,7 +14,6 @@ automatic news aggregation, player statistics, NPL coverage, and points tables.
 ```
 ├── backend/            # Express REST API + cron schedulers + service layer
 ├── frontend/           # Next.js website + admin dashboard
-├── supabase/           # SQL schema + seed data
 └── README.md
 ```
 
@@ -22,15 +21,16 @@ automatic news aggregation, player statistics, NPL coverage, and points tables.
 
 ### 1. Database
 
-Create a Supabase project, then run `supabase/schema.sql` in the SQL editor
-(or via `supabase db push` / `psql`). Optionally run `supabase/seed.sql`.
+Start a MongoDB instance (local `mongod` or MongoDB Atlas) and note the connection string.
+No schema migrations are required — collections and indexes are created automatically on first boot.
 
 ### 2. Backend
 
 ```bash
 cd backend
 npm install
-cp .env.example .env   # fill in SUPABASE_URL, SUPABASE_SERVICE_KEY, etc.
+cp .env.example .env   # fill in MONGO_URL, ADMIN_API_TOKEN, etc.
+npm run seed           # optional: demo teams/series/players/matches/news/videos/ads
 npm run dev
 ```
 
@@ -85,7 +85,7 @@ Providers live in `backend/src/services/providers`:
 
 ### Failure protection
 
-- Last successful data is retained in Supabase and served if the upstream API fails.
+- Last successful data is retained in MongoDB and served if the upstream API fails.
 - Errors are logged to `api_logs` and surfaced in the admin dashboard.
 - Retries happen automatically on the next scheduled run.
 - The frontend shows "Live data temporarily unavailable. Showing the latest available information." when appropriate.
@@ -98,7 +98,7 @@ Frontend: see `frontend/.env.example`.
 ## Key security notes
 
 - API keys live only in the backend (server-side) environment — never in frontend code.
-- The frontend uses the Supabase anon key / our REST API only.
+- The frontend uses our REST API only; the admin panel authenticates with `ADMIN_API_TOKEN`.
 - News content stores headlines + permitted summaries/excerpts and links to the
   original source. Full copyrighted articles are never copied.
 
@@ -107,4 +107,4 @@ Frontend: see `frontend/.env.example`.
 - Run the scheduler on a single instance (e.g. a small VPS or a cron-capable
   platform like Railway / Render / GitHub Actions cron).
 - Point `NEXT_PUBLIC_API_BASE_URL` at the deployed backend.
-- Generate a `SUPABASE_SERVICE_KEY` server-side only.
+- Set a strong, unique `ADMIN_API_TOKEN` server-side only.

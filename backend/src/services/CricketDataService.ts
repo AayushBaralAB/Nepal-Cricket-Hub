@@ -27,7 +27,7 @@ export type MatchFilter = {
  *
  * Responsibilities:
  *  - pick the active provider from config
- *  - sync upstream data into Supabase (durable store)
+ *  - sync upstream data into MongoDB (durable store)
  *  - serve reads from an in-memory cache (the last-known-good snapshot)
  *  - never crash the API when the upstream provider fails — fall back to cache
  */
@@ -176,17 +176,19 @@ export class CricketDataService {
 
   private async setSyncStatus(status: 'success' | 'error', message: string) {
     if (!db.isConfigured) return;
-    await db.admin.from('sync_status').upsert(
+    await db.collection('sync_status').updateOne(
+      { job: 'cricket_sync' },
       {
-        job: 'cricket_sync',
-        status,
-        last_run_at: nowIso(),
-        last_success_at: status === 'success' ? nowIso() : undefined,
-        last_error: status === 'error' ? message : null,
-        last_message: message,
-        updated_at: nowIso(),
+        $set: {
+          status,
+          lastRunAt: nowIso(),
+          lastSuccessAt: status === 'success' ? nowIso() : null,
+          lastError: status === 'error' ? message : null,
+          lastMessage: message,
+          updatedAt: nowIso(),
+        },
       },
-      { onConflict: 'job' },
+      { upsert: true },
     );
   }
 
@@ -194,48 +196,63 @@ export class CricketDataService {
     const teams = await this.provider.getTeams();
     this.cacheTeams = teams;
     if (!db.isConfigured) return;
-    const rows = teams.map((t) => ({
-      name: t.name, short_name: t.shortName, slug: t.slug || slugify(t.name),
-      country: t.country ?? 'Nepal', team_type: t.teamType ?? 'Other', is_national: Boolean(t.isNational),
-      logo_url: t.logoUrl ?? null, external_id: t.externalId, updated_at: nowIso(),
+    const ops = teams.map((t) => ({
+      updateOne: {
+        filter: { externalId: t.externalId },
+        update: {
+          $set: {
+            name: t.name, shortName: t.shortName, slug: t.slug || slugify(t.name),
+            logoUrl: t.logoUrl ?? null, country: t.country ?? 'Nepal',
+            teamType: t.teamType ?? 'Other', isNational: Boolean(t.isNational),
+            updatedAt: nowIso(),
+          },
+        },
+        upsert: true,
+      },
     }));
-    for (const row of rows) {
-      await db.admin.from('teams').upsert(row, { onConflict: 'external_id' });
-    }
+    await db.collection('teams').bulkWrite(ops, { ordered: false });
   }
 
   private async syncSeries() {
     const series = await this.provider.getSeries();
     this.cacheSeries = series;
     if (!db.isConfigured) return;
-    for (const s of series) {
-      await db.admin.from('series').upsert(
-        {
-          name: s.name, slug: s.slug || slugify(s.name), type: s.type, category: s.category,
-          start_date: s.startDate ?? null, end_date: s.endDate ?? null, season: s.season ?? null,
-          status: s.status ?? 'upcoming', points_table_available: Boolean(s.pointsTableAvailable),
-          external_id: s.externalId, updated_at: nowIso(),
+    const ops = series.map((s) => ({
+      updateOne: {
+        filter: { externalId: s.externalId },
+        update: {
+          $set: {
+            name: s.name, slug: s.slug || slugify(s.name), type: s.type, category: s.category,
+            startDate: s.startDate ?? null, endDate: s.endDate ?? null, season: s.season ?? null,
+            status: s.status ?? 'upcoming', pointsTableAvailable: Boolean(s.pointsTableAvailable),
+            updatedAt: nowIso(),
+          },
         },
-        { onConflict: 'external_id' },
-      );
-    }
+        upsert: true,
+      },
+    }));
+    await db.collection('series').bulkWrite(ops, { ordered: false });
   }
 
   private async syncPlayers() {
     const players = await this.provider.getPlayers();
     this.cachePlayers = players;
     if (!db.isConfigured) return;
-    for (const p of players) {
-      await db.admin.from('players').upsert(
-        {
-          name: p.name, slug: p.slug || slugify(p.name), full_name: p.fullName ?? null,
-          photo_url: p.photoUrl ?? null, country: p.country ?? 'Nepal', role: p.role ?? 'Batter',
-          batting_style: p.battingStyle ?? null, bowling_style: p.bowlingStyle ?? null,
-          is_nepal: true, external_id: p.externalId, updated_at: nowIso(),
+    const ops = players.map((p) => ({
+      updateOne: {
+        filter: { externalId: p.externalId },
+        update: {
+          $set: {
+            name: p.name, slug: p.slug || slugify(p.name), fullName: p.fullName ?? null,
+            photoUrl: p.photoUrl ?? null, country: p.country ?? 'Nepal', role: p.role ?? 'Batter',
+            battingStyle: p.battingStyle ?? null, bowlingStyle: p.bowlingStyle ?? null,
+            teamId: p.teamId ?? null, isNepal: true, updatedAt: nowIso(),
+          },
         },
-        { onConflict: 'external_id' },
-      );
-    }
+        upsert: true,
+      },
+    }));
+    await db.collection('players').bulkWrite(ops, { ordered: false });
   }
 
   private async syncLiveMatches() {
@@ -288,17 +305,22 @@ export class CricketDataService {
     for (const [seriesId, rows] of tables) {
       this.cachePoints.set(seriesId, rows);
       if (!db.isConfigured) continue;
-      for (const row of rows) {
-        await db.admin.from('points_table').upsert(
-          {
-            series_id: seriesId, team_id: row.teamId,
-            matches: row.matches, wins: row.wins, losses: row.losses,
-            no_result: row.noResult, ties: row.ties, points: row.points,
-            net_run_rate: row.netRunRate, position: row.position, updated_at: nowIso(),
+      const ops = rows.map((row) => ({
+        updateOne: {
+          filter: { seriesId, teamId: row.teamId },
+          update: {
+            $set: {
+              teamName: row.teamName, shortName: row.shortName, slug: row.slug,
+              logoUrl: row.logoUrl ?? null, matches: row.matches, wins: row.wins,
+              losses: row.losses, noResult: row.noResult, ties: row.ties,
+              points: row.points, netRunRate: row.netRunRate, position: row.position,
+              updatedAt: nowIso(),
+            },
           },
-          { onConflict: 'series_id,team_id' },
-        );
-      }
+          upsert: true,
+        },
+      }));
+      await db.collection('points_table').bulkWrite(ops, { ordered: false });
     }
   }
 
@@ -310,137 +332,87 @@ export class CricketDataService {
 
   private async persistMatch(match: CricketMatch) {
     if (!db.isConfigured) return;
-    const teamIdByExternal = new Map(this.cacheTeams.map((t) => [t.externalId, t]));
 
-    const { data: existing, error: lookupError } = await db.admin
-      .from('matches')
-      .select('id')
-      .eq('external_id', match.externalId)
-      .maybeSingle();
-
-    if (lookupError) {
-      logger.warn('cricket', `Could not look up match ${match.externalId}`, lookupError);
-    }
-
-    const seriesRow = match.seriesId ? await this.seriesIdToUuid(match.seriesId) : null;
-    const home = teamIdByExternal.get(match.homeTeamId);
-    const away = teamIdByExternal.get(match.awayTeamId);
-
-    const payload = {
-      external_id: match.externalId,
-      series_id: seriesRow,
-      home_team_id: home ? await this.teamIdToUuid(home.externalId) : null,
-      away_team_id: away ? await this.teamIdToUuid(away.externalId) : null,
+    const set: Record<string, unknown> = {
       name: match.name,
       slug: match.slug || slugify(match.name),
-      match_type: match.matchType,
+      seriesId: match.seriesId ?? null,
+      seriesName: match.seriesName ?? null,
+      seriesSlug: match.seriesSlug ?? null,
+      matchType: match.matchType,
+      homeTeamId: match.homeTeamId,
+      homeTeam: match.homeTeam,
+      homeTeamShort: match.homeTeamShort,
+      homeTeamSlug: match.homeTeamSlug,
+      awayTeamId: match.awayTeamId,
+      awayTeam: match.awayTeam,
+      awayTeamShort: match.awayTeamShort,
+      awayTeamSlug: match.awayTeamSlug,
       venue: match.venue ?? null,
       city: match.city ?? null,
-      start_time: match.startTime,
+      startTime: match.startTime,
       status: match.status,
-      match_state: match.matchState ?? null,
+      matchState: match.matchState ?? null,
       result: match.result ?? null,
-      toss_winner: match.tossWinner ?? null,
-      toss_decision: match.tossDecision ?? null,
-      current_innings: match.currentInnings ?? 0,
-      is_live: match.status === 'live',
-      is_women: Boolean(match.isWomen),
-      is_u19: Boolean(match.isU19),
-      home_score: match.homeScore ?? null,
-      away_score: match.awayScore ?? null,
-      last_synced_at: nowIso(),
-      updated_at: nowIso(),
+      tossWinner: match.tossWinner ?? null,
+      tossDecision: match.tossDecision ?? null,
+      currentInnings: match.currentInnings ?? 0,
+      homeScore: match.homeScore ?? null,
+      awayScore: match.awayScore ?? null,
+      isLive: match.status === 'live',
+      isWomen: Boolean(match.isWomen),
+      isU19: Boolean(match.isU19),
+      lastSyncedAt: nowIso(),
+      updatedAt: nowIso(),
     };
 
-    let matchRowId = existing?.id as string | undefined;
-    if (!matchRowId) {
-      const { data, error } = await db.admin.from('matches').insert(payload).select('id').maybeSingle();
-      if (error) {
-        if (!String(error.message).includes('duplicate')) {
-          logger.warn('cricket', `Failed to insert match ${match.externalId}`, error);
-        }
-        const again = await db.admin.from('matches').select('id').eq('external_id', match.externalId).maybeSingle();
-        matchRowId = again.data?.id as string | undefined;
-      } else {
-        matchRowId = data?.id as string | undefined;
-      }
-    } else {
-      await db.admin.from('matches').update(payload).eq('id', matchRowId);
-    }
+    // Only overwrite scorecard data when the provider actually carries it.
+    if (match.innings?.length) set.innings = match.innings;
+    if (match.commentary?.length) set.commentary = match.commentary;
 
-    if (!matchRowId) return;
-
-    // Persist innings + ball-by-ball for live/complete matches that carry them.
-    for (const inn of match.innings ?? []) {
-      await db.admin.from('innings').upsert(
-        {
-          match_id: matchRowId, innings_number: inn.inningsNumber,
-          team_id: null, batting_team: inn.battingTeam,
-          runs: inn.runs, wickets: inn.wickets, overs: inn.overs,
-          run_rate: inn.runRate, declared: Boolean(inn.declared), extra: inn.extras ?? 0,
-        },
-        { onConflict: 'match_id,innings_number' },
+    try {
+      await db.collection('matches').updateOne(
+        { externalId: match.externalId },
+        { $set: set, $setOnInsert: { createdAt: nowIso() } },
+        { upsert: true },
       );
-      const { data: innRow } = await db.admin
-        .from('innings').select('id').eq('match_id', matchRowId).eq('innings_number', inn.inningsNumber).maybeSingle();
-      if (innRow?.id) {
-        await db.admin.from('batting_cards').delete().eq('innings_id', innRow.id as string);
-        await db.admin.from('bowling_cards').delete().eq('innings_id', innRow.id as string);
-        await db.admin.from('fall_of_wickets').delete().eq('innings_id', innRow.id as string);
-        for (const b of inn.batting ?? []) {
-          await db.admin.from('batting_cards').insert({
-            innings_id: innRow.id, player_name: b.name, runs: b.runs, balls: b.balls,
-            fours: b.fours, sixes: b.sixes, strike_rate: b.strikeRate,
-            dismissal: b.dismissal ?? null, is_not_out: b.isNotOut, is_out: b.isOut,
-          });
-        }
-        for (const bw of inn.bowling ?? []) {
-          await db.admin.from('bowling_cards').insert({
-            innings_id: innRow.id, player_name: bw.name, overs: bw.overs,
-            maidens: bw.maidens, runs: bw.runs, wickets: bw.wickets, economy: bw.economy,
-          });
-        }
-        for (const fow of inn.fallOfWickets ?? []) {
-          await db.admin.from('fall_of_wickets').insert({
-            innings_id: innRow.id, wicket_number: fow.wicketNumber, runs: fow.runs,
-            over: fow.over, player_name: fow.playerName ?? null,
-          });
-        }
-      }
+    } catch (err) {
+      logger.warn('cricket', `Failed to persist match ${match.externalId}`, err);
     }
-  }
-
-  private async seriesIdToUuid(externalId: string): Promise<string | null> {
-    const { data } = await db.admin.from('series').select('id').eq('external_id', externalId).maybeSingle();
-    return (data?.id as string) ?? null;
-  }
-
-  private async teamIdToUuid(externalId: string): Promise<string | null> {
-    const { data } = await db.admin.from('teams').select('id').eq('external_id', externalId).maybeSingle();
-    return (data?.id as string) ?? null;
   }
 
   async primeFromDatabase() {
-    // Load the last-known-good snapshot from Supabase on startup so the cache
+    // Load the last-known-good snapshot from MongoDB on startup so the cache
     // is warm even before the first scheduled sync completes.
-    if (!db.isConfigured) return;
+    if (!db.isConfigured || !db.isConnected) return;
     try {
-      const { data: matches } = await db.admin
-        .from('matches').select('*').order('start_time', { ascending: true }).limit(200);
-      for (const row of matches ?? []) {
-        this.upsertMatchIntoCache(this.dbMatchToDomain(row));
+      const matches = await db.collection('matches').find().sort({ startTime: 1 }).limit(200).toArray();
+      for (const row of matches) {
+        this.upsertMatchIntoCache(this.matchFromDoc(row));
       }
-      const { data: teams } = await db.admin.from('teams').select('*');
-      this.cacheTeams = (teams ?? []).map((t) => ({
-        externalId: t.external_id ?? t.id, name: t.name, shortName: t.short_name,
-        slug: t.slug, logoUrl: t.logo_url, country: t.country,
-        teamType: t.team_type, isNational: Boolean(t.is_national),
+      const teams = await db.collection('teams').find().toArray();
+      this.cacheTeams = teams.map((t) => ({
+        externalId: String(t.externalId ?? t._id),
+        name: String(t.name ?? ''),
+        shortName: String(t.shortName ?? ''),
+        slug: String(t.slug ?? ''),
+        logoUrl: t.logoUrl ? String(t.logoUrl) : undefined,
+        country: t.country ? String(t.country) : undefined,
+        teamType: t.teamType ? String(t.teamType) : undefined,
+        isNational: Boolean(t.isNational),
       }));
-      const { data: series } = await db.admin.from('series').select('*');
-      this.cacheSeries = (series ?? []).map((s) => ({
-        externalId: s.external_id ?? s.id, name: s.name, slug: s.slug, type: s.type,
-        category: s.category, startDate: s.start_date, endDate: s.end_date,
-        season: s.season, status: s.status, pointsTableAvailable: Boolean(s.points_table_available),
+      const series = await db.collection('series').find().toArray();
+      this.cacheSeries = series.map((s) => ({
+        externalId: String(s.externalId ?? s._id),
+        name: String(s.name ?? ''),
+        slug: String(s.slug ?? ''),
+        type: String(s.type ?? ''),
+        category: String(s.category ?? ''),
+        startDate: s.startDate ? String(s.startDate) : undefined,
+        endDate: s.endDate ? String(s.endDate) : undefined,
+        season: s.season ? String(s.season) : undefined,
+        status: s.status ? String(s.status) : undefined,
+        pointsTableAvailable: Boolean(s.pointsTableAvailable),
       }));
       logger.info('cricket', `Cache primed from database (${this.cacheMatches.length} matches)`);
     } catch (err) {
@@ -448,30 +420,44 @@ export class CricketDataService {
     }
   }
 
-  private dbMatchToDomain(row: Record<string, unknown>): CricketMatch {
+  private matchFromDoc(doc: Record<string, unknown>): CricketMatch {
+    const innings = Array.isArray(doc.innings)
+      ? (doc.innings as CricketMatch['innings'])
+      : [];
+    const commentary = Array.isArray(doc.commentary)
+      ? (doc.commentary as CricketMatch['commentary'])
+      : [];
     return {
-      externalId: String(row.external_id ?? row.id),
-      name: String(row.name ?? ''),
-      slug: String(row.slug ?? ''),
-      seriesId: row.series_id ? String(row.series_id) : undefined,
-      matchType: (row.match_type as CricketMatch['matchType']) ?? 'T20',
-      homeTeamId: String(row.home_team_id ?? ''),
-      homeTeam: 'Home', homeTeamShort: '', homeTeamSlug: '',
-      awayTeamId: String(row.away_team_id ?? ''),
-      awayTeam: 'Away', awayTeamShort: '', awayTeamSlug: '',
-      venue: row.venue ? String(row.venue) : '',
-      city: row.city ? String(row.city) : undefined,
-      startTime: String(row.start_time ?? new Date().toISOString()),
-      status: (row.status as CricketMatch['status']) ?? 'upcoming',
-      matchState: row.match_state ? String(row.match_state) : undefined,
-      result: row.result ? String(row.result) : undefined,
-      tossWinner: row.toss_winner ? String(row.toss_winner) : undefined,
-      tossDecision: row.toss_decision as 'bat' | 'bowl' | undefined,
-      currentInnings: Number(row.current_innings ?? 0),
-      homeScore: row.home_score ? String(row.home_score) : undefined,
-      awayScore: row.away_score ? String(row.away_score) : undefined,
-      innings: [], commentary: [],
-      isWomen: Boolean(row.is_women), isU19: Boolean(row.is_u19),
+      externalId: String(doc.externalId ?? doc._id ?? ''),
+      name: String(doc.name ?? ''),
+      slug: String(doc.slug ?? ''),
+      seriesId: doc.seriesId ? String(doc.seriesId) : undefined,
+      seriesName: doc.seriesName ? String(doc.seriesName) : undefined,
+      seriesSlug: doc.seriesSlug ? String(doc.seriesSlug) : undefined,
+      matchType: (doc.matchType as CricketMatch['matchType']) ?? 'T20',
+      homeTeamId: String(doc.homeTeamId ?? ''),
+      homeTeam: String(doc.homeTeam ?? 'Home'),
+      homeTeamShort: String(doc.homeTeamShort ?? ''),
+      homeTeamSlug: String(doc.homeTeamSlug ?? ''),
+      awayTeamId: String(doc.awayTeamId ?? ''),
+      awayTeam: String(doc.awayTeam ?? 'Away'),
+      awayTeamShort: String(doc.awayTeamShort ?? ''),
+      awayTeamSlug: String(doc.awayTeamSlug ?? ''),
+      venue: doc.venue ? String(doc.venue) : '',
+      city: doc.city ? String(doc.city) : undefined,
+      startTime: String(doc.startTime ?? new Date().toISOString()),
+      status: (doc.status as CricketMatch['status']) ?? 'upcoming',
+      matchState: doc.matchState ? String(doc.matchState) : undefined,
+      result: doc.result ? String(doc.result) : undefined,
+      tossWinner: doc.tossWinner ? String(doc.tossWinner) : undefined,
+      tossDecision: doc.tossDecision as 'bat' | 'bowl' | undefined,
+      currentInnings: Number(doc.currentInnings ?? 0),
+      homeScore: doc.homeScore ? String(doc.homeScore) : undefined,
+      awayScore: doc.awayScore ? String(doc.awayScore) : undefined,
+      innings,
+      commentary,
+      isWomen: Boolean(doc.isWomen),
+      isU19: Boolean(doc.isU19),
     };
   }
 }

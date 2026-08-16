@@ -42,7 +42,7 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
 
 const server = app.listen(config.port, () => {
   logger.info('api', `Nepal Cricket Hub API listening on http://localhost:${config.port} (${config.env})`);
-  logger.info('api', `Database configured: ${db.isConfigured}`);
+  logger.info('api', `Database configured: ${db.isConfigured}${db.isConfigured ? ` (connected: ${db.isConnected})` : ''}`);
   if (config.cricket.provider === 'http' && !config.cricket.apiBaseUrl) {
     logger.warn('api', 'CRICKET_API_BASE_URL is empty — using sample cricket provider.');
   }
@@ -50,7 +50,9 @@ const server = app.listen(config.port, () => {
 
 const graceful = () => {
   logger.info('api', 'Shutting down gracefully...');
-  server.close(() => process.exit(0));
+  server.close(() => {
+    db.close().finally(() => process.exit(0));
+  });
   setTimeout(() => process.exit(1), 5000).unref();
 };
 

@@ -30,9 +30,9 @@ async function newsSync() {
 async function cleanup() {
   if (!db.isConfigured) return;
   try {
-    const cutoff = new Date(Date.now() - config.retention.apiLogDays * 24 * 60 * 60 * 1000).toISOString();
-    await db.admin.from('api_logs').delete().lt('created_at', cutoff);
-    logger.info('jobs', `Cleanup finished. Trimmed api_logs older than ${config.retention.apiLogDays} days.`);
+    const cutoff = new Date(Date.now() - config.retention.apiLogDays * 24 * 60 * 60 * 1000);
+    const { deletedCount } = await db.collection('api_logs').deleteMany({ createdAt: { $lt: cutoff } });
+    logger.info('jobs', `Cleanup finished. Trimmed ${deletedCount} api_logs older than ${config.retention.apiLogDays} days.`);
   } catch (err) {
     logger.error('jobs', 'Cleanup failed', err);
   }

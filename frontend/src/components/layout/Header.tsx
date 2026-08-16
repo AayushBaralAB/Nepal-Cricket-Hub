@@ -22,7 +22,7 @@ const UTILITY_LINKS = [
   { href: '/videos', label: 'Videos' },
   { href: '/series', label: 'Series' },
   { href: '/contact', label: 'Contact' },
-  { href: '/login', label: 'Admin' },
+  { href: '/login', label: 'Login' },
 ];
 
 function BreakingTicker() {

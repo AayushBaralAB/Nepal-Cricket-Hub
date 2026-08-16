@@ -1,44 +1,39 @@
 import { Router } from 'express';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { timingSafeEqual } from 'crypto';
 import { db } from '../db';
 import { config } from '../config';
 import { cricketData } from '../services/CricketDataService';
 import { newsService } from '../services/NewsService';
 import { analytics } from '../services/AnalyticsService';
 import { logger } from '../utils/logger';
+import { nowIso } from '../utils/helpers';
+import { idFilter, toPlain, toPlainMany } from '../utils/mongo';
 
 const router = Router();
 
+/** Constant-time string comparison for the shared admin token. */
+function safeEqual(a: string, b: string): boolean {
+  const ab = Buffer.from(a);
+  const bb = Buffer.from(b);
+  if (ab.length !== bb.length) return false;
+  return timingSafeEqual(ab, bb);
+}
+
 function requireAdmin(req: import('express').Request, res: import('express').Response, next: () => void) {
   const token = (req.headers.authorization ?? '').replace(/^Bearer\s+/i, '');
-  if (!token) {
-    return res.status(401).json({ success: false, error: 'Authentication required' });
-  }
   if (!db.isConfigured) {
     return res.status(503).json({ success: false, error: 'Database not configured — admin endpoints unavailable' });
   }
-
-  const authClient = createClient(config.supabase.url, config.supabase.anonKey);
-  authClient.auth.getUser(token).then(({ data, error }) => {
-    if (error || !data.user) {
-      return res.status(401).json({ success: false, error: 'Invalid or expired token' });
-    }
-    db.admin
-      .from('users')
-      .select('role')
-      .eq('email', data.user.email ?? '')
-      .maybeSingle()
-      .then(
-        ({ data: userRow }) => {
-          if (userRow?.role !== 'admin') {
-            res.status(403).json({ success: false, error: 'Admin access required' });
-            return;
-          }
-          next();
-        },
-        () => res.status(500).json({ success: false, error: 'Admin check failed' }),
-      );
-  }, () => res.status(500).json({ success: false, error: 'Auth check failed' }));
+  if (!config.admin.apiToken) {
+    return res.status(503).json({ success: false, error: 'ADMIN_API_TOKEN is not configured on the backend.' });
+  }
+  if (!token) {
+    return res.status(401).json({ success: false, error: 'Authentication required' });
+  }
+  if (!safeEqual(token, config.admin.apiToken)) {
+    return res.status(401).json({ success: false, error: 'Invalid admin token' });
+  }
+  next();
 }
 
 router.use('/:section', (req, res, next) => {
@@ -88,27 +83,33 @@ router.get('/stats', async (_req, res) => {
     newsCount, liveCount, upcomingCount, completedCount, playersCount, teamsCount,
     apiErrors, syncStatus,
   ] = await Promise.all([
-    db.admin.from('news').select('id', { count: 'exact', head: true }).eq('status', 'published'),
-    db.admin.from('matches').select('id', { count: 'exact', head: true }).eq('is_live', true),
-    db.admin.from('matches').select('id', { count: 'exact', head: true }).eq('status', 'upcoming'),
-    db.admin.from('matches').select('id', { count: 'exact', head: true }).eq('status', 'completed'),
-    db.admin.from('players').select('id', { count: 'exact', head: true }),
-    db.admin.from('teams').select('id', { count: 'exact', head: true }),
-    db.admin.from('api_logs').select('*').eq('level', 'error').order('created_at', { ascending: false }).limit(20),
-    db.admin.from('sync_status').select('*'),
+    db.collection('news').countDocuments({ status: 'published' }),
+    db.collection('matches').countDocuments({ isLive: true }),
+    db.collection('matches').countDocuments({ status: 'upcoming' }),
+    db.collection('matches').countDocuments({ status: 'completed' }),
+    db.collection('players').countDocuments({}),
+    db.collection('teams').countDocuments({}),
+    db.collection('api_logs').find({ level: 'error' }).sort({ createdAt: -1 }).limit(20).toArray(),
+    db.collection('sync_status').find().toArray(),
   ]);
 
   json(res, {
     ...fromCache,
     dbConnected: true,
-    news: newsCount.count ?? fromCache.news,
-    liveMatches: liveCount.count ?? fromCache.liveMatches,
-    upcomingMatches: upcomingCount.count ?? fromCache.upcomingMatches,
-    completedMatches: completedCount.count ?? fromCache.completedMatches,
-    players: playersCount.count ?? fromCache.players,
-    teams: teamsCount.count ?? fromCache.teams,
-    apiErrors: apiErrors.data ?? [],
-    syncStatus: syncStatus.data ?? [],
+    news: newsCount ?? fromCache.news,
+    liveMatches: liveCount ?? fromCache.liveMatches,
+    upcomingMatches: upcomingCount ?? fromCache.upcomingMatches,
+    completedMatches: completedCount ?? fromCache.completedMatches,
+    players: playersCount ?? fromCache.players,
+    teams: teamsCount ?? fromCache.teams,
+    apiErrors: apiErrors.map((e) => ({
+      id: String(e._id),
+      level: e.level ?? null,
+      endpoint: e.endpoint ?? null,
+      message: e.message ?? null,
+      created_at: e.createdAt ?? null,
+    })),
+    syncStatus: syncStatus.map((s) => ({ id: String(s._id), ...s, created_at: s.updatedAt ?? null })),
     lastCricketUpdate: cricketData.lastSyncSuccessAt,
     lastNewsUpdate: newsService.lastFetchSuccessAt,
   });
@@ -135,101 +136,157 @@ router.post('/sync/news', async (_req, res) => {
 /* ------------------------------------------------------- news sources */
 
 router.get('/news-sources', async (_req, res) => {
-  const { data } = await db.admin.from('news_sources').select('*').order('name');
-  json(res, data ?? []);
+  const rows = await db.collection('news_sources').find().sort({ name: 1 }).toArray();
+  json(res, toPlainMany(rows));
 });
 
 router.post('/news-sources', async (req, res) => {
   const { name, url, type, category, enabled } = req.body ?? {};
   if (!name || !url) return res.status(400).json({ success: false, error: 'name and url are required' });
-  const { data, error } = await db.admin
-    .from('news_sources').insert({ name, url, type: type ?? 'rss', category: category ?? 'Nepal Cricket', enabled: enabled !== false })
-    .select().maybeSingle();
-  if (error) return res.status(400).json({ success: false, error: error.message });
-  json(res, data, 201);
+  try {
+    const { insertedId } = await db.collection('news_sources').insertOne({
+      name, url, type: type ?? 'rss', category: category ?? 'Nepal Cricket',
+      enabled: enabled !== false, createdAt: nowIso(),
+    });
+    json(res, { id: String(insertedId), name, url, type: type ?? 'rss', category: category ?? 'Nepal Cricket', enabled: enabled !== false }, 201);
+  } catch (err) {
+    res.status(400).json({ success: false, error: err instanceof Error ? err.message : 'Insert failed' });
+  }
 });
 
 router.patch('/news-sources/:id', async (req, res) => {
-  const { data, error } = await db.admin
-    .from('news_sources').update(req.body ?? {}).eq('id', req.params.id).select().maybeSingle();
-  if (error) return res.status(400).json({ success: false, error: error.message });
-  json(res, data);
+  try {
+    const { matchedCount } = await db.collection('news_sources').updateOne(
+      idFilter(req.params.id),
+      { $set: { ...(req.body ?? {}), updatedAt: nowIso() } },
+    );
+    if (!matchedCount) return res.status(404).json({ success: false, error: 'Source not found' });
+    json(res, { ok: true });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err instanceof Error ? err.message : 'Update failed' });
+  }
 });
 
 router.delete('/news-sources/:id', async (req, res) => {
-  const { error } = await db.admin.from('news_sources').delete().eq('id', req.params.id);
-  if (error) return res.status(400).json({ success: false, error: error.message });
-  json(res, { deleted: true });
+  try {
+    const { deletedCount } = await db.collection('news_sources').deleteOne(idFilter(req.params.id));
+    if (!deletedCount) return res.status(404).json({ success: false, error: 'Source not found' });
+    json(res, { deleted: true });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err instanceof Error ? err.message : 'Delete failed' });
+  }
 });
 
 /* ------------------------------------------------------- advertisements */
 
 router.get('/advertisements', async (_req, res) => {
-  const { data } = await db.admin.from('advertisements').select('*').order('name');
-  json(res, data ?? []);
+  const rows = await db.collection('advertisements').find().sort({ name: 1 }).toArray();
+  json(res, toPlainMany(rows));
 });
 
 router.post('/advertisements', async (req, res) => {
-  const { data, error } = await db.admin.from('advertisements').insert(req.body ?? {}).select().maybeSingle();
-  if (error) return res.status(400).json({ success: false, error: error.message });
-  json(res, data, 201);
+  try {
+    const body = req.body ?? {};
+    const { insertedId } = await db.collection('advertisements').insertOne({
+      ...body,
+      enabled: body.enabled !== false,
+      createdAt: nowIso(),
+      updatedAt: nowIso(),
+    });
+    json(res, { id: String(insertedId), ...body, enabled: body.enabled !== false }, 201);
+  } catch (err) {
+    res.status(400).json({ success: false, error: err instanceof Error ? err.message : 'Insert failed' });
+  }
 });
 
 router.patch('/advertisements/:id', async (req, res) => {
-  const { data, error } = await db.admin
-    .from('advertisements').update(req.body ?? {}).eq('id', req.params.id).select().maybeSingle();
-  if (error) return res.status(400).json({ success: false, error: error.message });
-  json(res, data);
+  try {
+    const { matchedCount } = await db.collection('advertisements').updateOne(
+      idFilter(req.params.id),
+      { $set: { ...(req.body ?? {}), updatedAt: nowIso() } },
+    );
+    if (!matchedCount) return res.status(404).json({ success: false, error: 'Advertisement not found' });
+    json(res, { ok: true });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err instanceof Error ? err.message : 'Update failed' });
+  }
 });
 
 router.delete('/advertisements/:id', async (req, res) => {
-  const { error } = await db.admin.from('advertisements').delete().eq('id', req.params.id);
-  if (error) return res.status(400).json({ success: false, error: error.message });
-  json(res, { deleted: true });
+  try {
+    const { deletedCount } = await db.collection('advertisements').deleteOne(idFilter(req.params.id));
+    if (!deletedCount) return res.status(404).json({ success: false, error: 'Advertisement not found' });
+    json(res, { deleted: true });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err instanceof Error ? err.message : 'Delete failed' });
+  }
 });
 
 /* ------------------------------------------------------ site settings */
 
 router.get('/settings', async (_req, res) => {
-  const { data } = await db.admin.from('site_settings').select('*');
-  json(res, data ?? []);
+  const rows = await db.collection('site_settings').find().toArray();
+  json(res, rows.map((s) => ({ key: s.key, value: s.value })));
 });
 
 router.put('/settings/:key', async (req, res) => {
-  const { data, error } = await db.admin
-    .from('site_settings').upsert({ key: req.params.key, value: req.body ?? {} }, { onConflict: 'key' })
-    .select().maybeSingle();
-  if (error) return res.status(400).json({ success: false, error: error.message });
-  json(res, data);
+  const { value } = req.body ?? {};
+  await db.collection('site_settings').updateOne(
+    { key: req.params.key },
+    { $set: { value: value ?? req.body ?? {}, updatedAt: nowIso() } },
+    { upsert: true },
+  );
+  json(res, { key: req.params.key, value: value ?? req.body ?? {} });
 });
 
 /* ------------------------------------------------------------- news */
 
-router.get('/news', async (req, res) => {
-  const { data } = await db.admin
-    .from('news').select('*')
-    .order('published_at', { ascending: false })
-    .range(0, 99);
-  json(res, data ?? []);
+router.get('/news', async (_req, res) => {
+  const rows = await db.collection('news')
+    .find()
+    .sort({ publishedAt: -1 })
+    .limit(100)
+    .toArray();
+  json(res, toPlainMany(rows));
 });
 
 router.post('/news', async (req, res) => {
-  const { data, error } = await db.admin.from('news').insert(req.body ?? {}).select().maybeSingle();
-  if (error) return res.status(400).json({ success: false, error: error.message });
-  json(res, data, 201);
+  const body = req.body ?? {};
+  try {
+    const { insertedId } = await db.collection('news').insertOne({
+      ...body,
+      isFeatured: Boolean(body.isFeatured),
+      status: body.status ?? 'published',
+      createdAt: nowIso(),
+      updatedAt: nowIso(),
+    });
+    json(res, { id: String(insertedId), ...body }, 201);
+  } catch (err) {
+    res.status(400).json({ success: false, error: err instanceof Error ? err.message : 'Insert failed' });
+  }
 });
 
 router.patch('/news/:id', async (req, res) => {
-  const { data, error } = await db.admin
-    .from('news').update(req.body ?? {}).eq('id', req.params.id).select().maybeSingle();
-  if (error) return res.status(400).json({ success: false, error: error.message });
-  json(res, data);
+  try {
+    const { matchedCount } = await db.collection('news').updateOne(
+      idFilter(req.params.id),
+      { $set: { ...(req.body ?? {}), updatedAt: nowIso() } },
+    );
+    if (!matchedCount) return res.status(404).json({ success: false, error: 'Article not found' });
+    json(res, { ok: true });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err instanceof Error ? err.message : 'Update failed' });
+  }
 });
 
 router.delete('/news/:id', async (req, res) => {
-  const { error } = await db.admin.from('news').delete().eq('id', req.params.id);
-  if (error) return res.status(400).json({ success: false, error: error.message });
-  json(res, { deleted: true });
+  try {
+    const { deletedCount } = await db.collection('news').deleteOne(idFilter(req.params.id));
+    if (!deletedCount) return res.status(404).json({ success: false, error: 'Article not found' });
+    json(res, { deleted: true });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err instanceof Error ? err.message : 'Delete failed' });
+  }
 });
 
 /* ----------------------------------------------------------- matches */
@@ -241,24 +298,33 @@ router.get('/matches', async (_req, res) => {
 router.patch('/matches/:id', async (req, res) => {
   // Manual overrides are only allowed as exceptions; scheduled sync wins on the next run.
   if (!db.isConfigured) return res.status(503).json({ success: false, error: 'DB not configured' });
-  const { data } = await db.admin
-    .from('matches').update(req.body ?? {}).eq('external_id', req.params.id).select().maybeSingle();
-  if (!data) {
-    const { data: byUuid } = await db.admin
-      .from('matches').update(req.body ?? {}).eq('id', req.params.id).select().maybeSingle();
-    return json(res, byUuid);
+  const { matchedCount } = await db.collection('matches').updateOne(
+    { externalId: req.params.id },
+    { $set: { ...(req.body ?? {}), updatedAt: nowIso() } },
+  );
+  if (matchedCount) return json(res, { ok: true });
+
+  // Fall back to the Mongo document id.
+  try {
+    const { matchedCount: byId } = await db.collection('matches').updateOne(
+      idFilter(req.params.id),
+      { $set: { ...(req.body ?? {}), updatedAt: nowIso() } },
+    );
+    return json(res, { ok: Boolean(byId) });
+  } catch {
+    return res.status(404).json({ success: false, error: 'Match not found' });
   }
-  json(res, data);
 });
 
 /* ---------------------------------------------------------- api logs */
 
-router.get('/api-logs', async (req, res) => {
-  const { data } = await db.admin
-    .from('api_logs').select('*')
-    .order('created_at', { ascending: false })
-    .range(0, 99);
-  json(res, data ?? []);
+router.get('/api-logs', async (_req, res) => {
+  const rows = await db.collection('api_logs')
+    .find()
+    .sort({ createdAt: -1 })
+    .limit(100)
+    .toArray();
+  json(res, rows.map((e) => toPlain(e)));
 });
 
 /* ---------------------------------------------------- admin bootstrap */
@@ -272,14 +338,20 @@ router.post('/bootstrap', async (req, res) => {
     return res.status(403).json({ success: false, error: 'Bootstrap endpoint disabled in production' });
   }
   try {
-    const { data: existing } = await db.admin.from('users').select('id').eq('email', email).maybeSingle();
-    if (!existing) {
-      await db.admin.from('users').insert({ email, full_name: 'Administrator', role: 'admin', is_active: true });
+    const existing = await db.collection('users').findOne({ email });
+    if (existing) {
+      await db.collection('users').updateOne(
+        { _id: existing._id },
+        { $set: { role: 'admin', isActive: true, updatedAt: nowIso() } },
+      );
     } else {
-      await db.admin.from('users').update({ role: 'admin' }).eq('id', existing.id);
+      await db.collection('users').insertOne({
+        email, fullName: 'Administrator', role: 'admin', isActive: true,
+        createdAt: nowIso(), updatedAt: nowIso(),
+      });
     }
     logger.info('admin', `Admin bootstrap: ${email}`);
-    json(res, { ok: true, message: 'Admin user ensured. Sign in through Supabase Auth to obtain a session.' });
+    json(res, { ok: true, message: 'Admin user ensured. Use the ADMIN_API_TOKEN from the backend .env to authenticate.' });
   } catch (err) {
     res.status(500).json({ success: false, error: String(err) });
   }

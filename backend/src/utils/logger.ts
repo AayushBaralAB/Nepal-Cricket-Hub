@@ -16,15 +16,15 @@ export function log(entry: LogEntry) {
   else console.log(line);
 
   if (!db.isConfigured) return;
-  db.admin
-    .from('api_logs')
-    .insert({
+  db.collection('api_logs')
+    .insertOne({
       source: entry.source,
       level: entry.level,
       endpoint: entry.endpoint ?? null,
-      status_code: entry.statusCode ?? null,
+      statusCode: entry.statusCode ?? null,
       message: entry.message,
       payload: entry.payload ?? null,
+      createdAt: new Date(),
     })
     .then(
       () => undefined,

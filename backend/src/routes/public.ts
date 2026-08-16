@@ -168,8 +168,19 @@ router.get('/stats/tournament', wrap(async (req, res) => {
 
 router.get('/videos', wrap(async (_req, res) => {
   if (!db.isConfigured) return json(res, []);
-  const { data } = await db.admin.from('videos').select('*').order('published_at', { ascending: false }).limit(20);
-  json(res, data ?? []);
+  const rows = await db.collection('videos').find().sort({ publishedAt: -1 }).limit(20).toArray();
+  json(res, rows.map((v) => ({
+    id: String(v._id),
+    title: String(v.title ?? ''),
+    slug: String(v.slug ?? ''),
+    description: v.description ? String(v.description) : undefined,
+    videoUrl: String(v.videoUrl ?? ''),
+    thumbnail: v.thumbnail ? String(v.thumbnail) : undefined,
+    source: String(v.source ?? 'YouTube'),
+    category: String(v.category ?? 'Highlights'),
+    publishedAt: v.publishedAt ? String(v.publishedAt) : undefined,
+    isFeatured: Boolean(v.isFeatured),
+  })));
 }));
 
 /* ------------------------------------------------------------------ ads */
@@ -177,15 +188,25 @@ router.get('/videos', wrap(async (_req, res) => {
 router.get('/ads/:slot', wrap(async (req, res) => {
   if (!db.isConfigured) return json(res, null);
   const today = new Date().toISOString().slice(0, 10);
-  const { data } = await db.admin
-    .from('advertisements')
-    .select('*')
-    .eq('slot', req.params.slot)
-    .eq('enabled', true)
-    .or(`start_date.is.null,start_date.lte.${today}`)
-    .or(`end_date.is.null,end_date.gte.${today}`)
-    .limit(5);
-  json(res, data ?? []);
+  const rows = await db.collection('advertisements')
+    .find({ slot: req.params.slot, enabled: true })
+    .toArray();
+  const live = rows.filter((ad) => {
+    if (ad.startDate && ad.startDate > today) return false;
+    if (ad.endDate && ad.endDate < today) return false;
+    return true;
+  }).slice(0, 5);
+  json(res, live.map((ad) => ({
+    id: String(ad._id),
+    name: String(ad.name ?? ''),
+    slot: String(ad.slot ?? req.params.slot),
+    format: String(ad.format ?? 'banner'),
+    type: String(ad.type ?? 'image'),
+    imageUrl: ad.imageUrl ? String(ad.imageUrl) : undefined,
+    html: ad.html ? String(ad.html) : undefined,
+    adClient: ad.adClient ? String(ad.adClient) : undefined,
+    linkUrl: ad.linkUrl ? String(ad.linkUrl) : undefined,
+  })));
 }));
 
 /* --------------------------------------------------------- search */
@@ -226,8 +247,8 @@ router.get('/site', wrap(async (_req, res) => {
       domain: 'nepalcrickethub.com',
     });
   }
-  const { data } = await db.admin.from('site_settings').select('key, value').eq('key', 'site').maybeSingle();
-  json(res, data?.value ?? {});
+  const row = await db.collection('site_settings').findOne({ key: 'site' });
+  json(res, (row?.value as Record<string, unknown>) ?? {});
 }));
 
 export default router;

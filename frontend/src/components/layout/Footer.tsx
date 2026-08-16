@@ -33,7 +33,7 @@ const GROUPS: Array<{ label: string; links: Array<{ href: string; label: string 
       { href: '/teams', label: 'Teams' },
       { href: '/series/nepal-premier-league-2025', label: 'NPL 2025 Series' },
       { href: '/videos', label: 'Videos' },
-      { href: '/login', label: 'Admin' },
+      { href: '/login', label: 'Login' },
     ],
   },
 ];

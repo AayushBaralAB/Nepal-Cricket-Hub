@@ -1,9 +1,21 @@
+import { db } from '../db';
 import { cricketData } from '../services/CricketDataService';
 import { newsService } from '../services/NewsService';
 import { logger } from '../utils/logger';
 
-/** Prime the in-memory cache from the database, then run one full sync cycle. */
+/** Connect to MongoDB, prime the in-memory cache, then run one full sync cycle. */
 export async function bootstrap() {
+  if (db.isConfigured) {
+    try {
+      await db.connect();
+      logger.info('bootstrap', 'Connected to MongoDB');
+    } catch (err) {
+      logger.error('bootstrap', 'MongoDB connection failed — continuing with cache-only data', err);
+    }
+  } else {
+    logger.warn('bootstrap', 'MONGO_URL is not set — database operations will be unavailable.');
+  }
+
   await cricketData.primeFromDatabase();
 
   if (cricketData.getMatches().length === 0) {

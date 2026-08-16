@@ -24,10 +24,12 @@ export const config = {
   env: process.env.NODE_ENV ?? 'development',
   port: int('PORT', 4000),
   corsOrigin: process.env.CORS_ORIGIN ?? 'http://localhost:3000',
-  supabase: {
-    url: process.env.SUPABASE_URL ?? '',
-    anonKey: process.env.SUPABASE_ANON_KEY ?? '',
-    serviceKey: process.env.SUPABASE_SERVICE_KEY ?? '',
+  mongo: {
+    url: process.env.MONGO_URL ?? '',
+    dbName: process.env.MONGO_DB_NAME ?? 'nepal_cricket_hub',
+  },
+  admin: {
+    apiToken: process.env.ADMIN_API_TOKEN ?? '',
   },
   cricket: {
     provider: (process.env.CRICKET_PROVIDER ?? 'sample') as 'sample' | 'http' | 'cricapi',
@@ -52,8 +54,7 @@ export const isProduction = config.env === 'production';
 
 export function assertConfig() {
   const missing: string[] = [];
-  if (!config.supabase.url) missing.push('SUPABASE_URL');
-  if (!config.supabase.serviceKey) missing.push('SUPABASE_SERVICE_KEY');
+  if (!config.mongo.url) missing.push('MONGO_URL');
   if (config.cricket.provider === 'http' && !config.cricket.apiBaseUrl) {
     missing.push('CRICKET_API_BASE_URL');
   }

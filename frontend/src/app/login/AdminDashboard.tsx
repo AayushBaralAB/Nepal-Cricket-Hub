@@ -244,14 +244,14 @@ export function AdminDashboard() {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div className="flex-1">
             <label htmlFor="admin-token" className="mb-1 block text-[11px] font-bold uppercase tracking-wider text-slate-500">
-              Supabase session token (optional)
+              Admin API token
             </label>
             <input
               id="admin-token"
               type="password"
               value={token}
               onChange={(e) => setToken(e.target.value)}
-              placeholder="Paste your admin JWT to unlock protected endpoints"
+              placeholder="Paste the ADMIN_API_TOKEN from your backend .env"
               className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-nch-600 focus:outline-none focus:ring-2 focus:ring-nch-600/20"
             />
           </div>
@@ -278,7 +278,7 @@ export function AdminDashboard() {
         <div className="card border-amber-200 bg-amber-50 p-4">
           <p className="text-sm font-bold text-amber-800">Database not configured</p>
           <p className="mt-1 text-sm text-amber-700">
-            Supabase environment variables are missing on the backend. Only cache-backed stats and health
+            MONGO_URL is missing on the backend. Only cache-backed stats and health
             are shown; protected data endpoints and sync are unavailable until the DB is configured.
           </p>
         </div>
@@ -400,7 +400,7 @@ export function AdminDashboard() {
         <h2 className="section-title !mb-3">Analytics</h2>
         {analytics.error && !analytics.data && (
           <p className="text-sm text-slate-500">
-            Analytics requires a Supabase admin token (protected endpoint). Save a valid token above to view
+            Analytics requires an admin token (protected endpoint). Save the token above to view
             page-view analytics.
           </p>
         )}

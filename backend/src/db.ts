@@ -1,42 +1,77 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { MongoClient, Db, Collection, Document } from 'mongodb';
 import { config } from './config';
 
 /**
- * Loose database typing for pragmatic development.
- * For production type-safety, replace with generated types from
- * `supabase gen types typescript` (see supabase/schema.sql).
+ * MongoDB access wrapper.
+ *
+ * The app connects lazily on startup via `connect()` (see jobs/bootstrap.ts).
+ * Services read/write through `db.collection('...')` and never touch a raw
+ * client, keeping the rest of the codebase independent of the driver API.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type Database = any;
+export class MongoDatabase {
+  private client: MongoClient | null = null;
+  private mongoDb: Db | null = null;
 
-export interface Db {
-  admin: SupabaseClient<Database>;
-  public: SupabaseClient<Database>;
-  isConfigured: boolean;
-}
-
-export function createDb(): Db {
-  const isConfigured = Boolean(config.supabase.url && config.supabase.serviceKey);
-
-  if (!isConfigured) {
-    console.warn('[db] Supabase not configured — database operations will be unavailable.');
+  /** Whether MONGO_URL is present in the environment. */
+  get isConfigured(): boolean {
+    return Boolean(config.mongo.url);
   }
 
-  const options = { auth: { persistSession: false } };
+  /** Whether the client has successfully connected. */
+  get isConnected(): boolean {
+    return Boolean(this.mongoDb);
+  }
 
-  // createClient requires a non-empty URL; use a placeholder when unconfigured
-  // since the clients are never actually called in that state.
-  const url = config.supabase.url || 'https://placeholder.supabase.co';
-  const key = config.supabase.anonKey || config.supabase.serviceKey || 'placeholder-key';
+  async connect(): Promise<void> {
+    if (!this.isConfigured || this.mongoDb) return;
+    this.client = new MongoClient(config.mongo.url, { serverSelectionTimeoutMS: 5000 });
+    await this.client.connect();
+    this.mongoDb = this.client.db(config.mongo.dbName || 'nepal_cricket_hub');
+    await this.ensureIndexes();
+  }
 
-  const publicClient = createClient<Database>(url, key, options);
-  const adminClient = createClient<Database>(url, config.supabase.serviceKey || key, options);
+  /** Underlying Mongo `Db` handle (throws if not connected). */
+  get raw(): Db {
+    if (!this.mongoDb) throw new Error('MongoDB is not connected — call db.connect() first.');
+    return this.mongoDb;
+  }
 
-  return {
-    admin: adminClient,
-    public: publicClient,
-    isConfigured,
-  };
+  collection<T extends Document = Document>(name: string): Collection<T> {
+    return this.raw.collection<T>(name);
+  }
+
+  async close(): Promise<void> {
+    await this.client?.close().catch(() => undefined);
+    this.client = null;
+    this.mongoDb = null;
+  }
+
+  private async ensureIndexes(): Promise<void> {
+    if (!this.mongoDb) return;
+    const db = this.mongoDb;
+    await Promise.all([
+      db.collection('matches').createIndex({ externalId: 1 }, { unique: true }),
+      db.collection('matches').createIndex({ status: 1 }),
+      db.collection('matches').createIndex({ startTime: 1 }),
+      db.collection('teams').createIndex({ externalId: 1 }, { unique: true }),
+      db.collection('teams').createIndex({ slug: 1 }, { unique: true }),
+      db.collection('series').createIndex({ externalId: 1 }, { unique: true }),
+      db.collection('series').createIndex({ slug: 1 }, { unique: true }),
+      db.collection('players').createIndex({ externalId: 1 }, { unique: true }),
+      db.collection('players').createIndex({ slug: 1 }, { unique: true }),
+      db.collection('news').createIndex({ originalGuid: 1 }),
+      db.collection('news').createIndex({ slug: 1 }),
+      db.collection('news').createIndex({ publishedAt: -1 }),
+      db.collection('news').createIndex({ category: 1 }),
+      db.collection('news_sources').createIndex({ url: 1 }, { unique: true }),
+      db.collection('users').createIndex({ email: 1 }, { unique: true }),
+      db.collection('site_settings').createIndex({ key: 1 }, { unique: true }),
+      db.collection('sync_status').createIndex({ job: 1 }, { unique: true }),
+      db.collection('points_table').createIndex({ seriesId: 1, teamId: 1 }, { unique: true }),
+      db.collection('player_statistics').createIndex({ playerId: 1, format: 1 }, { unique: true }),
+      db.collection('api_logs').createIndex({ createdAt: -1 }),
+    ]);
+  }
 }
 
-export const db = createDb();
+export const db = new MongoDatabase();

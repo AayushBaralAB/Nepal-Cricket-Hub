@@ -1,9 +1,8 @@
 import { playerService } from './PlayerService';
-import { db } from '../db';
 
 /**
  * Aggregated statistics endpoints (top run scorers, top wicket takers, etc.).
- * Falls back to curated sample numbers when Supabase isn't configured.
+ * Falls back to curated sample numbers when the database is empty.
  */
 export class StatsService {
   async topRunScorers(limit = 10, format = 'T20') {

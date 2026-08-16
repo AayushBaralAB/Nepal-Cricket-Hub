@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { XMLParser } from 'fast-xml-parser';
+import { ObjectId } from 'mongodb';
 import { db } from '../db';
 import { config } from '../config';
 import { logger } from '../utils/logger';
@@ -84,11 +85,12 @@ export class NewsService {
 
   async getSources(): Promise<NewsSourceConfig[]> {
     if (db.isConfigured) {
-      const { data } = await db.admin.from('news_sources').select('*').eq('enabled', true);
-      if (data && data.length) {
-        return data.map((s) => ({
-          id: String(s.id), name: String(s.name), url: String(s.url),
-          type: s.type as 'rss' | 'api', category: String(s.category), enabled: Boolean(s.enabled),
+      const rows = await db.collection('news_sources').find({ enabled: true }).toArray();
+      if (rows.length) {
+        return rows.map((s) => ({
+          id: String(s._id), name: String(s.name), url: String(s.url),
+          type: (s.type as 'rss' | 'api') ?? 'rss', category: String(s.category),
+          enabled: Boolean(s.enabled),
         }));
       }
     }
@@ -142,7 +144,7 @@ export class NewsService {
     return /breaking|just in|confirmed|announced|breaking news/i.test(title);
   }
 
-  async fetchAndStore(): Promise<{ added: number; total: number }> {
+  async fetchAndStore(): Promise<{ ok: boolean; added: number; total: number; message: string }> {
     this.lastFetchAttemptAt = new Date();
     const sources = await this.getSources();
     let added = 0;
@@ -166,28 +168,35 @@ export class NewsService {
     this.lastFetchedCount = added;
     logger.info('news', `News sync complete. Added ${added} new articles. Total cached: ${this.cache.length}`);
     await this.setSyncStatus(added);
-    return { added, total: this.cache.length };
+    return {
+      ok: true,
+      added,
+      total: this.cache.length,
+      message: `News sync completed. Added ${added} new articles.`,
+    };
   }
 
   private async setSyncStatus(added: number) {
     if (!db.isConfigured) return;
-    await db.admin.from('sync_status').upsert(
+    await db.collection('sync_status').updateOne(
+      { job: 'news_sync' },
       {
-        job: 'news_sync', status: 'success', last_run_at: nowIso(),
-        last_success_at: nowIso(), last_error: null,
-        last_message: `Added ${added} new articles. Total: ${this.cache.length}`,
-        updated_at: nowIso(),
+        $set: {
+          status: 'success', lastRunAt: nowIso(), lastSuccessAt: nowIso(), lastError: null,
+          lastMessage: `Added ${added} new articles. Total: ${this.cache.length}`,
+          updatedAt: nowIso(),
+        },
       },
-      { onConflict: 'job' },
+      { upsert: true },
     );
   }
 
   private async updateSourceStatus(source: NewsSourceConfig, ok: boolean) {
     if (!db.isConfigured || !source.id) return;
-    await db.admin
-      .from('news_sources')
-      .update({ last_fetched: nowIso(), last_status: ok ? 'ok' : 'error' })
-      .eq('id', source.id);
+    await db.collection('news_sources').updateOne(
+      { _id: new ObjectId(source.id) },
+      { $set: { lastFetched: nowIso(), lastStatus: ok ? 'ok' : 'error' } },
+    );
   }
 
   private async fetchSource(source: NewsSourceConfig): Promise<NewsItem[]> {
@@ -284,32 +293,29 @@ export class NewsService {
     if (!db.isConfigured) return true;
 
     // Dedupe against the database too.
-    const { data: dup } = await db.admin
-      .from('news')
-      .select('id')
-      .or(`original_guid.eq.${finalItem.originalGuid ?? '__none__'}`)
-      .limit(1);
-    if (dup && dup.length) return false;
+    const dup = await db.collection('news').findOne({ originalGuid: finalItem.originalGuid ?? '__none__' });
+    if (dup) return false;
 
-    const row = {
-      title: finalItem.title,
-      slug: finalItem.slug,
-      summary: finalItem.summary ?? null,
-      category: finalItem.category,
-      tags: finalItem.tags,
-      image_url: finalItem.imageUrl ?? null,
-      source_name: finalItem.sourceName,
-      source_url: finalItem.sourceUrl ?? null,
-      original_guid: finalItem.originalGuid ?? null,
-      is_breaking: finalItem.isBreaking,
-      is_featured: false,
-      published_at: finalItem.publishedAt ?? null,
-      status: 'published',
-    };
-
-    const { error } = await db.admin.from('news').upsert(row, { onConflict: 'original_guid', ignoreDuplicates: true });
-    if (error && !String(error.message).includes('duplicate')) {
-      logger.warn('news', `Failed to store news "${finalItem.title}"`, error);
+    try {
+      await db.collection('news').insertOne({
+        title: finalItem.title,
+        slug: finalItem.slug,
+        summary: finalItem.summary ?? null,
+        category: finalItem.category,
+        tags: finalItem.tags,
+        imageUrl: finalItem.imageUrl ?? null,
+        sourceName: finalItem.sourceName,
+        sourceUrl: finalItem.sourceUrl ?? null,
+        originalGuid: finalItem.originalGuid ?? null,
+        isBreaking: finalItem.isBreaking,
+        isFeatured: false,
+        publishedAt: finalItem.publishedAt ?? null,
+        status: 'published',
+        createdAt: nowIso(),
+        updatedAt: nowIso(),
+      });
+    } catch (err) {
+      logger.warn('news', `Failed to store news "${finalItem.title}"`, err);
       return false;
     }
     return true;
