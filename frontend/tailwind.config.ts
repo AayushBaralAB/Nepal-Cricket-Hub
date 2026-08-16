@@ -34,6 +34,11 @@ const config: Config = {
             500: '#f59e0b',
           },
         },
+        // Top-level saffron palette — used by gradient stops, chips and accents.
+        saffron: {
+          400: '#fbbf24',
+          500: '#f59e0b',
+        },
       },
       fontFamily: {
         sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
@@ -42,7 +47,10 @@ const config: Config = {
       animation: {
         'live-pulse': 'livePulse 1.5s ease-in-out infinite',
         marquee: 'marquee 28s linear infinite',
-        'fade-in-up': 'fadeInUp 0.4s ease-out both',
+        'fade-in-up': 'fadeInUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both',
+        'shimmer': 'shimmer 1.8s linear infinite',
+        'float': 'float 6s ease-in-out infinite',
+        'pulse-slow': 'livePulse 2.5s ease-in-out infinite',
       },
       keyframes: {
         livePulse: {
@@ -54,8 +62,16 @@ const config: Config = {
           '100%': { transform: 'translateX(-50%)' },
         },
         fadeInUp: {
-          '0%': { opacity: '0', transform: 'translateY(12px)' },
+          '0%': { opacity: '0', transform: 'translateY(14px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        shimmer: {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
+        },
+        float: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-8px)' },
         },
       },
       container: {
@@ -64,9 +80,24 @@ const config: Config = {
         screens: { '2xl': '1280px' },
       },
       boxShadow: {
-        card: '0 1px 3px rgba(15,23,42,0.08), 0 4px 16px rgba(15,23,42,0.06)',
-        'card-hover': '0 4px 12px rgba(15,23,42,0.1), 0 12px 32px rgba(15,23,42,0.12)',
-        glow: '0 0 0 1px rgba(220,46,39,0.2), 0 0 24px rgba(220,46,39,0.25)',
+        card: '0 1px 2px rgba(15,23,42,0.04), 0 4px 16px rgba(15,23,42,0.06)',
+        'card-hover': '0 2px 6px rgba(15,23,42,0.08), 0 18px 44px -14px rgba(13,27,56,0.22)',
+        soft: '0 8px 30px -12px rgba(13,27,56,0.18)',
+        'glow-red': '0 6px 22px -8px rgba(220,46,39,0.55)',
+        'glow-saffron': '0 6px 22px -8px rgba(245,158,11,0.5)',
+        'glow-navy': '0 12px 44px -12px rgba(0,0,0,0.55)',
+        'inner-top': 'inset 0 1px 0 rgba(255,255,255,0.06)',
+      },
+      backgroundImage: {
+        'brand-gradient': 'linear-gradient(135deg, #dc2e27 0%, #a11e19 55%, #0d1b38 100%)',
+        'saffron-gradient': 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
+        'navy-gradient': 'linear-gradient(135deg, #132852 0%, #0d1b38 100%)',
+      },
+      transitionTimingFunction: {
+        premium: 'cubic-bezier(0.22, 1, 0.36, 1)',
+      },
+      borderRadius: {
+        '4xl': '2rem',
       },
     },
   },

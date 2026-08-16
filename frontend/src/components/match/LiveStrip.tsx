@@ -41,36 +41,45 @@ export function LiveStrip({ initial = [] }: { initial?: CricketMatch[] }) {
   if (!matches.length) return null;
 
   return (
-    <div className="flex items-stretch gap-3 overflow-x-auto pb-1">
+    <div className="flex items-stretch gap-4 overflow-x-auto pb-2">
       {matches.map((m) => (
         <Link
           key={m.externalId}
           href={`/matches/${m.externalId}`}
-          className="card card-hover flex min-w-[260px] max-w-[320px] shrink-0 flex-col p-3"
+          className="card card-hover relative flex min-w-[270px] max-w-[320px] shrink-0 flex-col overflow-hidden p-4"
         >
+          <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-nch-600 via-nch-500 to-saffron-500" />
           <div className="mb-2 flex items-center justify-between">
-            <span className="chip gap-1.5 bg-nch-600 text-white">
+            <span className="chip gap-1.5 bg-nch-600 text-white shadow-glow-red">
               <span className="live-dot bg-white" /> Live
             </span>
-            <span className="text-[10px] font-bold uppercase text-slate-400">{m.matchType}</span>
+            <span className="rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-slate-500">
+              {m.matchType}
+            </span>
           </div>
-          <div className="space-y-1.5 text-sm">
+          <div className="space-y-2 text-sm">
             <div className="flex items-center justify-between gap-2">
-              <span className="flex items-center gap-2 font-semibold text-slate-800">
-                <TeamAvatar name={m.homeTeam} size={24} />
-                {m.homeTeam}
+              <span className="flex min-w-0 items-center gap-2 font-bold text-slate-800">
+                <TeamAvatar name={m.homeTeam} size={26} />
+                <span className="truncate">{m.homeTeam}</span>
               </span>
-              <span className="font-bold tabular-nums text-slate-900">{m.homeScore?.split(' (')[0]}</span>
+              <span className="font-display text-base font-black tabular-nums text-slate-900">
+                {m.homeScore?.split(' (')[0]}
+              </span>
             </div>
             <div className="flex items-center justify-between gap-2">
-              <span className="flex items-center gap-2 font-semibold text-slate-800">
-                <TeamAvatar name={m.awayTeam} size={24} />
-                {m.awayTeam}
+              <span className="flex min-w-0 items-center gap-2 font-bold text-slate-800">
+                <TeamAvatar name={m.awayTeam} size={26} />
+                <span className="truncate">{m.awayTeam}</span>
               </span>
-              <span className="font-bold tabular-nums text-slate-900">{m.awayScore?.split(' (')[0]}</span>
+              <span className="font-display text-base font-black tabular-nums text-slate-900">
+                {m.awayScore?.split(' (')[0]}
+              </span>
             </div>
           </div>
-          <p className="mt-2 truncate text-[11px] font-semibold text-nch-700">{m.matchState}</p>
+          <p className="mt-3 truncate border-t border-slate-100 pt-2.5 text-[11px] font-bold text-nch-700">
+            {m.matchState}
+          </p>
         </Link>
       ))}
     </div>

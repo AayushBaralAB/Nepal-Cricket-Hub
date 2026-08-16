@@ -1,7 +1,7 @@
 export function LiveBadge({ small = false }: { small?: boolean }) {
   return (
     <span
-      className={`chip gap-1.5 bg-nch-600 text-white ${small ? 'text-[10px]' : ''}`}
+      className={`chip gap-1.5 bg-nch-600 text-white shadow-glow-red ${small ? 'text-[10px]' : ''}`}
       role="status"
       aria-label="Live"
     >
@@ -26,8 +26,16 @@ export function StatusPill({ status }: { status: string }) {
     abandoned: 'Abandoned',
     cancelled: 'Cancelled',
   };
+  const dot: Record<string, string> = {
+    live: 'bg-white',
+    upcoming: 'bg-amber-500',
+    completed: 'bg-emerald-500',
+    abandoned: 'bg-slate-500',
+    cancelled: 'bg-rose-500',
+  };
   return (
     <span className={`chip ${map[status] ?? 'bg-slate-100 text-slate-600'}`}>
+      <span className={`h-1.5 w-1.5 rounded-full ${dot[status] ?? 'bg-slate-400'}`} />
       {label[status] ?? status}
     </span>
   );
@@ -47,7 +55,7 @@ export function CategoryChip({ category }: { category: string }) {
     'Cricket Updates': 'bg-sky-600 text-white',
   };
   return (
-    <span className={`chip ${colors[category] ?? 'bg-slate-600 text-white'}`}>
+    <span className={`chip shadow-sm ${colors[category] ?? 'bg-slate-600 text-white'}`}>
       {category}
     </span>
   );

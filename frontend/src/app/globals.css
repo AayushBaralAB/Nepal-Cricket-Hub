@@ -14,7 +14,20 @@ html {
 
 body {
   @apply bg-slate-50 text-slate-900 antialiased;
+  background-image:
+    radial-gradient(58rem 40rem at 115% -10%, rgba(245, 158, 11, 0.07), transparent 60%),
+    radial-gradient(48rem 34rem at -12% 8%, rgba(220, 46, 39, 0.055), transparent 55%),
+    radial-gradient(40rem 30rem at 50% 120%, rgba(30, 58, 138, 0.05), transparent 60%);
+  background-attachment: fixed;
   text-rendering: optimizeLegibility;
+}
+
+::selection {
+  @apply bg-nch-600 text-white;
+}
+
+:focus-visible {
+  @apply outline-none ring-2 ring-nch-600/50 ring-offset-2 ring-offset-slate-50;
 }
 
 h1, h2, h3, h4 {
@@ -27,27 +40,36 @@ h1, h2, h3, h4 {
   }
 
   .card {
-    @apply rounded-xl border border-slate-200 bg-white shadow-card transition-all duration-200;
+    @apply rounded-2xl border border-slate-200/80 bg-white shadow-card transition-all duration-300 ease-premium;
   }
 
   .card-hover {
-    @apply hover:-translate-y-0.5 hover:shadow-card-hover hover:border-slate-300;
+    @apply hover:-translate-y-1 hover:border-nch-600/15 hover:shadow-card-hover;
   }
 
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-nch-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-nch-700;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-nch-600 to-nch-700 px-4 py-2 text-sm font-bold text-white shadow-soft transition-all duration-300 ease-premium hover:from-nch-500 hover:to-nch-600 hover:shadow-glow-red active:scale-[0.98];
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition-all duration-300 ease-premium hover:border-nch-400/50 hover:text-nch-700 hover:shadow-soft;
   }
 
   .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-slate-600 transition-colors duration-200 hover:bg-slate-100 hover:text-slate-900;
   }
 
   .chip {
-    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide;
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider;
+  }
+
+  .overline-label {
+    @apply mb-1.5 inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.18em] text-nch-600;
+  }
+
+  .overline-label::before {
+    content: '';
+    @apply block h-px w-6 bg-gradient-to-r from-nch-600 to-transparent;
   }
 
   .section-title {
@@ -56,7 +78,7 @@ h1, h2, h3, h4 {
 
   .section-title::before {
     content: '';
-    @apply block h-6 w-1 rounded-full bg-nch-600;
+    @apply block h-6 w-1 rounded-full bg-gradient-to-b from-nch-500 to-nch-navy-700;
   }
 
   .live-dot {
@@ -69,6 +91,32 @@ h1, h2, h3, h4 {
 
   .table-td {
     @apply px-3 py-2.5 text-sm text-slate-700;
+  }
+
+  .text-gradient-brand {
+    @apply bg-gradient-to-r from-saffron-400 via-saffron-500 to-nch-500 bg-clip-text text-transparent;
+  }
+
+  .text-gradient-navy {
+    @apply bg-gradient-to-r from-nch-600 to-nch-navy-700 bg-clip-text text-transparent;
+  }
+
+  .glass-dark {
+    @apply border border-white/15 bg-white/5 backdrop-blur-md;
+  }
+
+  .link-underline {
+    @apply relative transition-colors;
+  }
+
+  .link-underline::after {
+    content: '';
+    @apply absolute inset-x-0 -bottom-0.5 h-0.5 origin-left scale-x-0 rounded-full bg-gradient-to-r from-nch-500 to-saffron-500 transition-transform duration-300 ease-premium;
+  }
+
+  .link-underline:hover::after,
+  .link-underline:focus-visible::after {
+    @apply scale-x-100;
   }
 }
 

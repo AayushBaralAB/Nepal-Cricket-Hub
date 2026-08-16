@@ -19,19 +19,19 @@ export function PlayerCard({ player }: { player: CricketPlayer }) {
           <img
             src={player.photoUrl}
             alt={player.name}
-            className="h-20 w-20 rounded-full border-2 border-slate-200 object-cover"
+            className="h-20 w-20 rounded-full border-2 border-slate-200 object-cover transition-all duration-300 ease-premium group-hover:border-nch-500/50 group-hover:shadow-glow-red"
             loading="lazy"
           />
         ) : (
-          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-nch-600 to-nch-navy-800 font-display text-xl font-black text-white">
+          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-nch-600 to-nch-navy-800 font-display text-xl font-black text-white transition-all duration-300 ease-premium group-hover:shadow-glow-red">
             {initials(player.name)}
           </div>
         )}
-        <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 rounded-full bg-nch-600 px-1.5 py-0.5 text-[9px] font-black uppercase text-white">
+        <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-nch-600 to-nch-500 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-white shadow-soft">
           {player.country ?? 'Nepal'}
         </span>
       </div>
-      <h3 className="mt-3 truncate font-display text-sm font-bold text-slate-900 group-hover:text-nch-600">
+      <h3 className="mt-3 truncate font-display text-sm font-bold text-slate-900 transition-colors duration-200 group-hover:text-nch-600">
         {player.name}
       </h3>
       <p className={`mt-1 inline-block rounded-full px-2 py-0.5 text-[10px] font-bold ${ROLE_COLORS[player.role ?? 'Batter'] ?? 'bg-slate-100 text-slate-600'}`}>

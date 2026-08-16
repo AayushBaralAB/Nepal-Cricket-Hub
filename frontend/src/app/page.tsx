@@ -70,7 +70,79 @@ export default async function HomePage() {
   const displayVideos = videos ?? [];
 
   return (
-    <div className="container-nch space-y-12 py-8">
+    <div className="container-nch space-y-14 py-8">
+      {/* ----------------------- HERO ----------------------- */}
+      <section
+        aria-label="Welcome"
+        className="relative animate-fade-in-up overflow-hidden rounded-3xl bg-navy-gradient text-white shadow-card-hover"
+      >
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            backgroundImage:
+              'radial-gradient(42rem 26rem at 85% -10%, rgba(245,158,11,0.18), transparent 60%), radial-gradient(38rem 26rem at -5% 110%, rgba(220,46,39,0.22), transparent 55%)',
+          }}
+        />
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.06]"
+          style={{
+            backgroundImage:
+              'linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)',
+            backgroundSize: '44px 44px',
+          }}
+        />
+
+        <div className="relative px-6 py-10 sm:px-10 sm:py-14 lg:px-14">
+          <span className="glass-dark inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] text-saffron-400">
+            <span className="live-dot bg-saffron-400" />
+            Nepal Cricket Hub
+          </span>
+
+          <h1 className="mt-5 max-w-2xl font-display text-4xl font-black leading-[1.06] tracking-tight sm:text-5xl lg:text-6xl">
+            Nepal&apos;s Cricket.
+            <span className="text-gradient-brand block pb-1">One Hub.</span>
+          </h1>
+
+          <p className="mt-5 max-w-xl text-base leading-relaxed text-slate-300 sm:text-lg">
+            Live scores, fixtures and results, automatic news, NPL coverage and
+            player statistics — every ball, every boundary, all in one place.
+          </p>
+
+          <div className="mt-7 flex flex-wrap items-center gap-3">
+            <Link href="/live" className="btn-primary !px-6 !py-3 !text-base !from-nch-500 !to-nch-600">
+              <span className="live-dot bg-white" /> Watch Live
+            </Link>
+            <Link href="/npl" className="btn-secondary !border-white/15 !bg-white/10 !px-6 !py-3 !text-base !text-white backdrop-blur-md hover:!bg-white/15">
+              Explore NPL
+            </Link>
+            <Link
+              href="/points-table"
+              className="link-underline !px-1 !py-1 text-sm font-bold text-slate-200 hover:text-white"
+            >
+              Points Table →
+            </Link>
+          </div>
+
+          <dl className="mt-9 grid max-w-lg grid-cols-2 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 sm:grid-cols-4">
+            {[
+              { label: 'Live now', value: live?.length ?? 0 },
+              { label: 'Upcoming', value: schedule.length },
+              { label: 'Teams', value: teams?.length ?? 0 },
+              { label: 'Players', value: players?.length ?? 0 },
+            ].map((stat) => (
+              <div key={stat.label} className="bg-nch-navy-900/80 px-4 py-3 backdrop-blur-sm">
+                <dd className="font-display text-2xl font-black tabular-nums text-white">
+                  {stat.value}
+                </dd>
+                <dt className="mt-0.5 text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                  {stat.label}
+                </dt>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </section>
+
       {/* ----------------------- LIVE ----------------------- */}
       <section aria-labelledby="live-heading">
         <div className="mb-4 flex items-center justify-between">
@@ -87,7 +159,7 @@ export default async function HomePage() {
       {/* ----------------------- NEWS FEATURE ----------------------- */}
       {featured.length > 0 && (
         <section aria-label="Featured news">
-          <SectionHeader title="Top Stories" href="/news" />
+          <SectionHeader overline="News" title="Top Stories" href="/news" />
           <div className="grid gap-5 lg:grid-cols-3">
             <div className="lg:col-span-2">
               <NewsCard item={featured[0]} featured />
@@ -108,7 +180,7 @@ export default async function HomePage() {
       <div className="grid gap-8 lg:grid-cols-3">
         <div className="space-y-8 lg:col-span-2">
           <section aria-label="Upcoming matches">
-            <SectionHeader title="Upcoming Matches" href="/matches?status=upcoming" />
+            <SectionHeader overline="Fixtures" title="Upcoming Matches" href="/matches?status=upcoming" />
             {schedule.length ? (
               <div className="grid gap-4 sm:grid-cols-2">
                 {schedule.map((m) => <MatchCard key={m.externalId} match={m} />)}
@@ -119,7 +191,7 @@ export default async function HomePage() {
           </section>
 
           <section aria-label="Recent results">
-            <SectionHeader title="Recent Results" href="/matches?status=completed" />
+            <SectionHeader overline="Results" title="Recent Results" href="/matches?status=completed" />
             {results?.length ? (
               <div className="grid gap-4 sm:grid-cols-2">
                 {results.map((m) => <MatchCard key={m.externalId} match={m} />)}
@@ -211,7 +283,7 @@ export default async function HomePage() {
 
       {/* ----------------------- LATEST NEWS ----------------------- */}
       <section aria-label="Latest Nepal cricket news">
-        <SectionHeader title="Latest Nepal Cricket News" href="/news" />
+        <SectionHeader overline="Latest" title="Latest Nepal Cricket News" href="/news" />
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {latest.map((item) => <NewsCard key={item.slug} item={item} />)}
         </div>
@@ -219,7 +291,7 @@ export default async function HomePage() {
 
       {/* ----------------------- PLAYERS ----------------------- */}
       <section aria-label="Player highlights">
-        <SectionHeader title="Player Highlights" href="/players" />
+        <SectionHeader overline="Players" title="Player Highlights" href="/players" />
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {nepalPlayers.map((player) => (
             <PlayerCard key={player.externalId} player={player} />

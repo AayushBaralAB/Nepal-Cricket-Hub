@@ -18,6 +18,8 @@ function list(name: string): string[] {
     .filter(Boolean);
 }
 
+const provider = (process.env.CRICKET_PROVIDER ?? 'sample') as 'sample' | 'http' | 'cricapi';
+
 export const config = {
   env: process.env.NODE_ENV ?? 'development',
   port: int('PORT', 4000),
@@ -28,7 +30,7 @@ export const config = {
     serviceKey: process.env.SUPABASE_SERVICE_KEY ?? '',
   },
   cricket: {
-    provider: (process.env.CRICKET_PROVIDER ?? 'sample') as 'sample' | 'http',
+    provider: (process.env.CRICKET_PROVIDER ?? 'sample') as 'sample' | 'http' | 'cricapi',
     apiBaseUrl: process.env.CRICKET_API_BASE_URL ?? '',
     apiKey: process.env.CRICKET_API_KEY ?? '',
   },
@@ -36,7 +38,8 @@ export const config = {
     rssFeeds: list('NEWS_RSS_FEEDS'),
   },
   cron: {
-    cricket: process.env.CRON_CRICKET ?? '*/2 * * * *',
+    cricket: process.env.CRON_CRICKET ?? (provider === 'cricapi' ? '0 */6 * * *' : '*/2 * * * *'),
+    liveRefresh: process.env.CRON_LIVE_REFRESH ?? (provider === 'cricapi' ? '30 */2 * * *' : ''),
     news: process.env.CRON_NEWS ?? '*/10 * * * *',
     cleanup: process.env.CRON_CLEANUP ?? '0 * * * *',
   },
@@ -53,6 +56,9 @@ export function assertConfig() {
   if (!config.supabase.serviceKey) missing.push('SUPABASE_SERVICE_KEY');
   if (config.cricket.provider === 'http' && !config.cricket.apiBaseUrl) {
     missing.push('CRICKET_API_BASE_URL');
+  }
+  if (config.cricket.provider === 'cricapi' && !config.cricket.apiKey) {
+    missing.push('CRICKET_API_KEY');
   }
   if (missing.length) {
     // We still allow the app to boot for the frontend-only parts, but log loudly.

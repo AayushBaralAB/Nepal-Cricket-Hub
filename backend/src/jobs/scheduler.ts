@@ -13,6 +13,13 @@ async function cricketSync() {
   logger.info('jobs', `cricket_sync finished in ${Date.now() - started}ms (ok=${result.ok})`);
 }
 
+async function liveRefresh() {
+  const started = Date.now();
+  logger.info('jobs', 'cricket_live_refresh starting');
+  const result = await cricketData.refreshLive();
+  logger.info('jobs', `cricket_live_refresh finished in ${Date.now() - started}ms (ok=${result.ok})`);
+}
+
 async function newsSync() {
   const started = Date.now();
   logger.info('jobs', 'news_sync starting');
@@ -35,10 +42,19 @@ export function startScheduler() {
   if (config.cricket.provider === 'http' && !config.cricket.apiBaseUrl) {
     logger.warn('jobs', 'Cricket provider is "http" but CRICKET_API_BASE_URL is missing — sync will use the sample provider.');
   }
+  if (config.cricket.provider === 'cricapi' && !config.cricket.apiKey) {
+    logger.warn('jobs', 'Cricket provider is "cricapi" but CRICKET_API_KEY is missing — sync will use the sample provider.');
+  }
 
   const cricketTask = cron.schedule(config.cron.cricket, () => {
     cricketSync().catch((err) => logger.error('jobs', 'cricket_sync threw', err));
   });
+  let liveTask: ReturnType<typeof cron.schedule> | null = null;
+  if (config.cron.liveRefresh) {
+    liveTask = cron.schedule(config.cron.liveRefresh, () => {
+      liveRefresh().catch((err) => logger.error('jobs', 'cricket_live_refresh threw', err));
+    });
+  }
   const newsTask = cron.schedule(config.cron.news, () => {
     newsSync().catch((err) => logger.error('jobs', 'news_sync threw', err));
   });
@@ -52,9 +68,12 @@ export function startScheduler() {
     newsSync().catch(() => undefined);
   }, 2000);
 
-  logger.info('jobs', `Scheduler started. cricket=[${config.cron.cricket}] news=[${config.cron.news}] cleanup=[${config.cron.cleanup}]`);
+  logger.info(
+    'jobs',
+    `Scheduler started. cricket=[${config.cron.cricket}] liveRefresh=[${config.cron.liveRefresh || 'off'}] news=[${config.cron.news}] cleanup=[${config.cron.cleanup}]`,
+  );
 
-  return { cricketTask, newsTask, cleanupTask, syncNow: cricketSync, newsNow: newsSync };
+  return { cricketTask, liveTask, newsTask, cleanupTask, syncNow: cricketSync, newsNow: newsSync };
 }
 
 export async function manualSyncCricket() {

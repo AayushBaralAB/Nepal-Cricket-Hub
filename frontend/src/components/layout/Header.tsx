@@ -18,6 +18,13 @@ const NAV_LINKS = [
   { href: '/points-table', label: 'Points Table' },
 ];
 
+const UTILITY_LINKS = [
+  { href: '/videos', label: 'Videos' },
+  { href: '/series', label: 'Series' },
+  { href: '/contact', label: 'Contact' },
+  { href: '/admin', label: 'Admin' },
+];
+
 function BreakingTicker() {
   const [items, setItems] = useState<NewsItem[]>([]);
 
@@ -38,23 +45,27 @@ function BreakingTicker() {
   if (!items.length) return null;
 
   return (
-    <div className="flex items-center gap-3 overflow-hidden bg-nch-navy-900 px-4 py-2 text-sm">
-      <span className="flex shrink-0 items-center gap-1.5 rounded bg-nch-600 px-2 py-0.5 text-[11px] font-black uppercase tracking-wider text-white">
-        <span className="live-dot" /> Breaking
-      </span>
-      <div className="relative flex-1 overflow-hidden">
-        <div className="ticker-track flex w-max gap-10 whitespace-nowrap">
-          {[...items, ...items].map((item, i) => (
-            <Link
-              key={`${item.slug}-${i}`}
-              href={`/news/${item.slug}`}
-              className="shrink-0 text-slate-200 transition-colors hover:text-white"
-            >
-              {item.title}
-            </Link>
-          ))}
+    <div className="relative overflow-hidden bg-gradient-to-r from-nch-navy-800 via-nch-navy-900 to-nch-navy-800 px-4 py-2 text-sm shadow-inner-top">
+      <div className="relative z-10 flex items-center gap-3">
+        <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-gradient-to-r from-nch-600 to-nch-500 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-white shadow-glow-red">
+          <span className="live-dot bg-white" /> Breaking
+        </span>
+        <div className="relative flex-1 overflow-hidden">
+          <div className="ticker-track flex w-max gap-12 whitespace-nowrap">
+            {[...items, ...items].map((item, i) => (
+              <Link
+                key={`${item.slug}-${i}`}
+                href={`/news/${item.slug}`}
+                className="shrink-0 text-slate-300 transition-colors hover:text-white"
+              >
+                {item.title}
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
+      <div className="pointer-events-none absolute inset-y-0 left-0 z-20 w-16 bg-gradient-to-r from-nch-navy-900 to-transparent" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 z-20 w-16 bg-gradient-to-l from-nch-navy-900 to-transparent" />
     </div>
   );
 }
@@ -80,7 +91,26 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50">
-      <div className="bg-nch-navy-900 shadow-lg">
+      <div className="hidden border-b border-white/10 bg-nch-navy-900/95 sm:block">
+        <div className="container-nch flex h-9 items-center justify-between text-xs">
+          <p className="font-semibold uppercase tracking-[0.18em] text-slate-400">
+            Nepal Cricket Hub — All Nepal cricket, one place
+          </p>
+          <nav className="flex items-center gap-5" aria-label="Utility">
+            {UTILITY_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="font-semibold text-slate-400 transition-colors hover:text-white"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+        </div>
+      </div>
+
+      <div className="border-b border-white/10 bg-nch-navy-900/85 shadow-lg backdrop-blur-xl">
         <div className="container-nch flex h-16 items-center justify-between gap-4">
           <Logo />
 
@@ -89,13 +119,18 @@ export function Header() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`rounded-md px-3 py-2 text-sm font-semibold transition-colors ${
+                className={`relative rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${
                   isActive(link.href)
-                    ? 'bg-white/10 text-white'
+                    ? 'text-white'
                     : 'text-slate-300 hover:bg-white/5 hover:text-white'
                 }`}
               >
                 {link.label}
+                <span
+                  className={`absolute inset-x-3 -bottom-[9px] h-0.5 rounded-full bg-gradient-to-r from-nch-500 to-saffron-500 transition-all duration-300 ease-premium ${
+                    isActive(link.href) ? 'scale-x-100' : 'scale-x-0'
+                  }`}
+                />
               </Link>
             ))}
           </nav>
@@ -108,7 +143,7 @@ export function Header() {
                 setMenuOpen(false);
               }}
               aria-label="Search"
-              className="rounded-md p-2 text-slate-300 transition-colors hover:bg-white/10 hover:text-white"
+              className="rounded-xl p-2 text-slate-300 transition-colors hover:bg-white/10 hover:text-white"
             >
               <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                 <circle cx="11" cy="11" r="7" />
@@ -117,7 +152,7 @@ export function Header() {
             </button>
             <Link
               href="/live"
-              className="hidden items-center gap-1.5 rounded-lg bg-nch-600 px-3 py-2 text-sm font-bold text-white transition-colors hover:bg-nch-500 sm:inline-flex"
+              className="hidden items-center gap-1.5 rounded-xl bg-gradient-to-r from-nch-600 to-nch-500 px-3.5 py-2 text-sm font-bold text-white shadow-glow-red transition-all duration-300 ease-premium hover:shadow-glow-red hover:brightness-110 sm:inline-flex"
             >
               <span className="live-dot bg-white" /> Live
             </Link>
@@ -129,7 +164,7 @@ export function Header() {
               }}
               aria-label="Menu"
               aria-expanded={menuOpen}
-              className="rounded-md p-2 text-slate-300 transition-colors hover:bg-white/10 hover:text-white lg:hidden"
+              className="rounded-xl p-2 text-slate-300 transition-colors hover:bg-white/10 hover:text-white lg:hidden"
             >
               {menuOpen ? (
                 <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -146,7 +181,7 @@ export function Header() {
 
         {searchOpen && (
           <form
-            className="border-t border-white/10 bg-nch-navy-800"
+            className="border-t border-white/10 bg-nch-navy-800/90 backdrop-blur-xl"
             action="/search"
             role="search"
           >
@@ -157,9 +192,9 @@ export function Header() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search news, players, teams, matches…"
-                className="w-full rounded-lg border border-white/15 bg-white/5 px-4 py-2 text-sm text-white placeholder:text-slate-400 focus:border-nch-500 focus:outline-none"
+                className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-slate-400 focus:border-saffron-500/60 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-saffron-500/20"
               />
-              <button type="submit" className="btn-primary shrink-0">
+              <button type="submit" className="btn-primary shrink-0 !bg-gradient-to-r !from-saffron-500 !to-saffron-400 !text-nch-navy-900">
                 Search
               </button>
             </div>
@@ -167,21 +202,30 @@ export function Header() {
         )}
 
         {menuOpen && (
-          <nav className="border-t border-white/10 bg-nch-navy-800 lg:hidden" aria-label="Mobile">
+          <nav className="border-t border-white/10 bg-nch-navy-800/95 backdrop-blur-xl lg:hidden" aria-label="Mobile">
             <div className="container-nch flex flex-col gap-1 py-3">
               {NAV_LINKS.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`rounded-md px-3 py-2.5 text-sm font-semibold ${
+                  className={`flex items-center justify-between rounded-lg px-3 py-2.5 text-sm font-semibold ${
                     isActive(link.href)
                       ? 'bg-white/10 text-white'
                       : 'text-slate-300 hover:bg-white/5 hover:text-white'
                   }`}
                 >
                   {link.label}
+                  <span className="text-slate-500">→</span>
                 </Link>
               ))}
+              <div className="mt-2 flex items-center gap-2 border-t border-white/10 pt-3">
+                <Link href="/live" className="btn-primary flex-1">
+                  <span className="live-dot bg-white" /> Watch Live
+                </Link>
+                <Link href="/search" className="btn-secondary flex-1 !border-white/15 !bg-white/5 !text-white hover:!bg-white/10">
+                  Search
+                </Link>
+              </div>
             </div>
           </nav>
         )}

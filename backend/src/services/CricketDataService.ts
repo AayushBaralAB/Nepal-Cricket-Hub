@@ -5,6 +5,7 @@ import { slugify, nowIso } from '../utils/helpers';
 import { CricketProvider } from './CricketService';
 import { SampleCricketProvider } from './providers/SampleCricketProvider';
 import { HttpCricketProvider } from './providers/HttpCricketProvider';
+import { CricApiProvider } from './providers/CricApiProvider';
 import {
   CricketMatch, CricketPlayer, CricketSeries, CricketTeam, PointsRow,
 } from '../types/cricket';
@@ -45,7 +46,9 @@ export class CricketDataService {
 
   constructor() {
     this.provider =
-      config.cricket.provider === 'http' ? new HttpCricketProvider() : new SampleCricketProvider();
+      config.cricket.provider === 'http' ? new HttpCricketProvider()
+      : config.cricket.provider === 'cricapi' ? new CricApiProvider()
+      : new SampleCricketProvider();
     if (!this.provider.isConfigured()) {
       logger.warn('cricket', `Provider "${this.provider.name}" is not configured. Falling back to sample provider.`);
       this.provider = new SampleCricketProvider();
@@ -97,6 +100,11 @@ export class CricketDataService {
 
   getMatchBySlug(slug: string): CricketMatch | null {
     return this.cacheMatches.find((m) => m.slug === slug) ?? null;
+  }
+
+  /** Insert a match (e.g. fetched on-demand) into the in-memory cache. */
+  seedMatch(match: CricketMatch): void {
+    this.upsertMatchIntoCache(match);
   }
 
   getTeams(): CricketTeam[] {
@@ -240,6 +248,22 @@ export class CricketDataService {
     for (const match of live) {
       this.upsertMatchIntoCache(match);
       await this.persistMatch(match);
+    }
+  }
+
+  /** Cheap live-score refresh (1-2 API hits) — safe to run frequently. */
+  async refreshLive(): Promise<{ ok: boolean; message: string }> {
+    this.lastSyncAttemptAt = new Date();
+    try {
+      await this.syncLiveMatches();
+      this.lastSyncSuccessAt = new Date();
+      this.lastSyncError = null;
+      return { ok: true, message: 'Live refresh completed' };
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Unknown sync error';
+      this.lastSyncError = message;
+      logger.error('cricket', `Live refresh failed: ${message}`, err);
+      return { ok: false, message: 'Live refresh failed' };
     }
   }
 

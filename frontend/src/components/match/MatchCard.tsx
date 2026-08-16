@@ -31,7 +31,7 @@ function TeamRow({
         <p className="text-xs text-slate-500">{short}</p>
       </div>
       {score && (
-        <span className={`text-sm font-bold tabular-nums ${won ? 'text-emerald-700' : 'text-slate-900'}`}>
+        <span className={`font-display text-lg font-black tabular-nums ${won ? 'text-emerald-700' : 'text-slate-900'}`}>
           {score}
         </span>
       )}
@@ -47,13 +47,17 @@ export function MatchCard({ match }: { match: CricketMatch }) {
   return (
     <Link
       href={`/matches/${match.externalId}`}
-      className="card card-hover block p-4"
+      className="card card-hover relative block overflow-hidden p-4"
       aria-label={`${match.name} — ${match.status}`}
     >
+      {status === 'live' && (
+        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-nch-600 via-nch-500 to-saffron-500" />
+      )}
       <div className="mb-3 flex items-center justify-between gap-2">
         {status === 'live' ? <LiveBadge small /> : <StatusPill status={status} />}
-        <p className="truncate text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-          {match.seriesName ?? 'Cricket'}
+        <p className="flex min-w-0 items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-slate-500">
+          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-gradient-to-r from-nch-500 to-saffron-500" />
+          <span className="truncate">{match.seriesName ?? 'Cricket'}</span>
         </p>
       </div>
 
@@ -76,7 +80,7 @@ export function MatchCard({ match }: { match: CricketMatch }) {
       </div>
 
       <div className="mt-3 border-t border-slate-100 pt-3">
-        <p className={`text-xs font-semibold ${status === 'completed' ? 'text-emerald-700' : 'text-slate-600'}`}>
+        <p className={`text-xs font-bold ${status === 'completed' ? 'text-emerald-700' : 'text-slate-600'}`}>
           {match.result ?? match.matchState ?? formatDateTime(match.startTime)}
         </p>
         <p className="mt-1 flex items-center gap-1.5 truncate text-[11px] text-slate-400">

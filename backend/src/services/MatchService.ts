@@ -17,7 +17,12 @@ export class MatchService {
 
   /** Enrich match with a full scorecard from the database when available. */
   async getDetailed(id: string): Promise<CricketMatch | null> {
-    const match = cricketData.getMatchById(id);
+    let match = cricketData.getMatchById(id);
+    if (!match) {
+      // Cache miss — fetch the single match from the live provider (1 API hit).
+      match = await cricketData.activeProvider.getMatch(id).catch(() => null);
+      if (match && !cricketData.getMatchById(id)) cricketData.seedMatch(match);
+    }
     if (!match || !db.isConfigured) return match;
 
     const { data: dbMatch } = await db.admin
