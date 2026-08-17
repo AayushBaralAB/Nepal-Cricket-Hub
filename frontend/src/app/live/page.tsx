@@ -1,18 +1,23 @@
 import type { Metadata } from 'next';
-import { safeFetch, getLiveMatches } from '@/lib/api';
+import { safeFetch, getLiveMatches, getLiveStreams } from '@/lib/api';
 import { LivePageClient } from './LivePageClient';
+import { LiveStreamGrid } from '@/components/live/LiveStreamGrid';
 import { AdSlot } from '@/components/ui/AdSlot';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Live Cricket Scores — Nepal Cricket',
+  title: 'Live Cricket Scores — CricketHub',
   description: 'Live cricket scores, ball-by-ball updates, run rates and match status for Nepal cricket, NPL and international matches.',
 };
 
 export default async function LivePage() {
-  const live = await safeFetch(getLiveMatches());
+  const [live, streams] = await Promise.all([
+    safeFetch(getLiveMatches()),
+    safeFetch(getLiveStreams()),
+  ]);
+
   return (
     <div className="container-nch space-y-8 py-8">
       <Breadcrumbs items={[{ label: 'Live Scores' }]} />
@@ -27,6 +32,8 @@ export default async function LivePage() {
       </p>
 
       <AdSlot slot="live_top" />
+
+      {streams && streams.length > 0 && <LiveStreamGrid streams={streams} />}
 
       <LivePageClient initial={live ?? []} />
 

@@ -18,7 +18,7 @@ function list(name: string): string[] {
     .filter(Boolean);
 }
 
-const provider = (process.env.CRICKET_PROVIDER ?? 'sample') as 'sample' | 'http' | 'cricapi';
+const provider = (process.env.CRICKET_PROVIDER ?? 'sample') as 'sample' | 'http' | 'cricapi' | 'cricbuzz';
 
 export const config = {
   env: process.env.NODE_ENV ?? 'development',
@@ -32,7 +32,7 @@ export const config = {
     apiToken: process.env.ADMIN_API_TOKEN ?? '',
   },
   cricket: {
-    provider: (process.env.CRICKET_PROVIDER ?? 'sample') as 'sample' | 'http' | 'cricapi',
+    provider: (process.env.CRICKET_PROVIDER ?? 'sample') as 'sample' | 'http' | 'cricapi' | 'cricbuzz',
     apiBaseUrl: process.env.CRICKET_API_BASE_URL ?? '',
     apiKey: process.env.CRICKET_API_KEY ?? '',
   },

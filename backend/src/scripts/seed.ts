@@ -354,6 +354,33 @@ async function seed() {
     { upsert: true },
   );
 
+  // Live streams (YouTube embeds — inline, no outbound links)
+  const LIVE_STREAMS = [
+    { title: "Men's T20 World Cup 2026 LIVE", videoId: 'mhEoBlRqfaE', order: 1 },
+    { title: "Men's T20 World Cup 2026 LIVE", videoId: 'iHT48AVOQ80', order: 2 },
+    { title: "Men's T20 World Cup 2026 LIVE", videoId: 're9P6hmJ_sY', order: 3 },
+    { title: "Men's T20 World Cup 2026 LIVE", videoId: 'iOid998g1eI', order: 4 },
+    { title: "Men's T20 World Cup 2026 LIVE", videoId: 'M7-F_oMl7nk', order: 5 },
+  ];
+  for (const stream of LIVE_STREAMS) {
+    await db.collection('live_streams').updateOne(
+      { videoId: stream.videoId },
+      {
+        $setOnInsert: {
+          title: stream.title,
+          videoId: stream.videoId,
+          embedUrl: `https://www.youtube.com/embed/${stream.videoId}?rel=0&modestbranding=1`,
+          platform: 'youtube',
+          order: stream.order,
+          enabled: true,
+          createdAt: nowIso(),
+          updatedAt: nowIso(),
+        },
+      },
+      { upsert: true },
+    );
+  }
+
   // Admin user (optional)
   const email = process.env.ADMIN_EMAIL;
   if (email) {

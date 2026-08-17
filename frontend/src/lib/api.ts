@@ -4,6 +4,7 @@ import type {
   CricketPlayer,
   CricketSeries,
   CricketTeam,
+  LiveStream,
   NewsItem,
   PlayerProfile,
   PointsRow,
@@ -126,6 +127,7 @@ export const getPointsTable = (seriesSlug?: string) =>
 export const getTopRunScorers = (limit = 10) => api.get<StatRow[]>(`/stats/top-run-scorers?limit=${limit}`);
 export const getTopWicketTakers = (limit = 10) => api.get<StatRow[]>(`/stats/top-wicket-takers?limit=${limit}`);
 export const getVideos = () => api.get<Video[]>('/videos');
+export const getLiveStreams = () => api.get<LiveStream[]>('/live-streams');
 export const getAds = (slot: string) => api.get<Advertisement[]>(`/ads/${slot}`);
 export const searchAll = (q: string) => api.get<SearchResults>(`/search?q=${encodeURIComponent(q)}`);
 export const getHealth = () => api.get('/health');

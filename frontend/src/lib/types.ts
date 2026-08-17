@@ -283,3 +283,12 @@ export interface AdminAnalytics {
   topReferrers: Array<{ ref: string; views: number }>;
   deviceBreakdown: Array<{ device: string; views: number }>;
 }
+
+export interface LiveStream {
+  id: string;
+  title: string;
+  videoId: string;
+  embedUrl: string;
+  platform: string;
+  order: number;
+}

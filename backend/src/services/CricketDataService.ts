@@ -6,6 +6,7 @@ import { CricketProvider } from './CricketService';
 import { SampleCricketProvider } from './providers/SampleCricketProvider';
 import { HttpCricketProvider } from './providers/HttpCricketProvider';
 import { CricApiProvider } from './providers/CricApiProvider';
+import { CricbuzzProvider } from './providers/CricbuzzProvider';
 import {
   CricketMatch, CricketPlayer, CricketSeries, CricketTeam, PointsRow,
 } from '../types/cricket';
@@ -48,6 +49,7 @@ export class CricketDataService {
     this.provider =
       config.cricket.provider === 'http' ? new HttpCricketProvider()
       : config.cricket.provider === 'cricapi' ? new CricApiProvider()
+      : config.cricket.provider === 'cricbuzz' ? new CricbuzzProvider()
       : new SampleCricketProvider();
     if (!this.provider.isConfigured()) {
       logger.warn('cricket', `Provider "${this.provider.name}" is not configured. Falling back to sample provider.`);

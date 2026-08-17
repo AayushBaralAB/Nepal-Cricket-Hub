@@ -224,6 +224,24 @@ router.get('/search', wrap((req, res) => {
   json(res, { query: q, news, players, teams, matches, series });
 }));
 
+/* -------------------------------------------------- live streams */
+
+router.get('/live-streams', wrap(async (_req, res) => {
+  if (!db.isConfigured) return json(res, []);
+  const rows = await db.collection('live_streams')
+    .find({ enabled: true })
+    .sort({ order: 1 })
+    .toArray();
+  json(res, rows.map((r) => ({
+    id: String(r._id),
+    title: String(r.title ?? ''),
+    videoId: String(r.videoId ?? ''),
+    embedUrl: String(r.embedUrl ?? ''),
+    platform: String(r.platform ?? 'youtube'),
+    order: Number(r.order ?? 0),
+  })));
+}));
+
 /* ------------------------------------------------------------ analytics */
 
 router.post('/analytics/page-view', wrap((req, res) => {
