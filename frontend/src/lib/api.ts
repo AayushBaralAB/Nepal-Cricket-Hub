@@ -14,7 +14,7 @@ import type {
 } from './types';
 
 export const API_BASE =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:4000/api';
+  (process.env.NEXT_PUBLIC_API_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:4000/api').replace(/\/+$/, '') + '/api';
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? 'https://crickethub.com';
 
