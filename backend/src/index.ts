@@ -7,6 +7,7 @@ import { db } from './db';
 import { logger } from './utils/logger';
 import publicRoutes from './routes/public';
 import adminRoutes from './routes/admin';
+import featureRoutes from './routes/features';
 import { bootstrap } from './jobs/bootstrap';
 import { startScheduler } from './jobs/scheduler';
 
@@ -28,6 +29,7 @@ app.get('/api/health', (_req, res) => {
 });
 
 app.use('/api', publicRoutes);
+app.use('/api', featureRoutes);
 app.use('/api/admin', adminRoutes);
 
 app.use((_req, res) => {

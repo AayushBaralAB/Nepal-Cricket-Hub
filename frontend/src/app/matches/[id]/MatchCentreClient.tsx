@@ -8,6 +8,8 @@ import { TeamAvatar } from '@/components/ui/TeamAvatar';
 import { LiveBadge, StatusPill } from '@/components/ui/Badges';
 import { Scorecard } from '@/components/match/Scorecard';
 import { AdSlot } from '@/components/ui/AdSlot';
+import { MatchReminderButton } from '@/components/match/MatchReminderButton';
+import { PredictionCard } from '@/components/match/PredictionCard';
 
 export function MatchCentreClient({ initial, matchId }: { initial: CricketMatch; matchId: string }) {
   const [match, setMatch] = useState<CricketMatch>(initial);
@@ -155,6 +157,16 @@ export function MatchCentreClient({ initial, matchId }: { initial: CricketMatch;
       )}
 
       <AdSlot slot="match_top" />
+
+      {/* ---------------- reminder + prediction ---------------- */}
+      {(match.status === 'upcoming' || match.status === 'live') && (
+        <div className="grid gap-4 sm:grid-cols-2">
+          {match.status === 'upcoming' && (
+            <MatchReminderButton matchId={matchId} matchTitle={match.name} />
+          )}
+          <PredictionCard match={match} />
+        </div>
+      )}
 
       {/* ---------------- scorecards ---------------- */}
       <section aria-label="Scorecards">

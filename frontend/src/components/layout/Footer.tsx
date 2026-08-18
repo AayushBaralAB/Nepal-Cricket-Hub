@@ -28,6 +28,8 @@ const GROUPS: Array<{ label: string; links: Array<{ href: string; label: string 
   {
     label: 'More',
     links: [
+      { href: '/predictions', label: 'Predict Matches' },
+      { href: '/gallery', label: 'Photo Gallery' },
       { href: '/news', label: 'News Categories' },
       { href: '/players', label: 'Players' },
       { href: '/teams', label: 'Teams' },

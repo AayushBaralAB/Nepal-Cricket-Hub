@@ -27,6 +27,33 @@ async function newsSync() {
   logger.info('jobs', `news_sync finished in ${Date.now() - started}ms — added ${result.added}`);
 }
 
+async function processReminders() {
+  if (!db.isConfigured) return;
+  try {
+    const upcoming = await db.collection('match_reminders')
+      .find({ notified: false })
+      .toArray();
+    const now = Date.now();
+    let notified = 0;
+    for (const r of upcoming) {
+      const matchTime = new Date(String(r.matchTime ?? '')).getTime();
+      if (!matchTime || isNaN(matchTime)) continue;
+      const diffMs = matchTime - now;
+      const diffMin = diffMs / 60000;
+      if (diffMin <= Number(r.remindBeforeMinutes ?? 60) && diffMin > -60) {
+        await db.collection('match_reminders').updateOne(
+          { _id: r._id },
+          { $set: { notified: true, notifiedAt: nowIso() } },
+        );
+        notified++;
+      }
+    }
+    if (notified > 0) logger.info('jobs', `Reminders: notified ${notified} users`);
+  } catch (err) {
+    logger.error('jobs', 'processReminders failed', err);
+  }
+}
+
 async function cleanup() {
   if (!db.isConfigured) return;
   try {
@@ -61,6 +88,9 @@ export function startScheduler() {
   const cleanupTask = cron.schedule(config.cron.cleanup, () => {
     cleanup().catch((err) => logger.error('jobs', 'cleanup threw', err));
   });
+  const reminderTask = cron.schedule('* * * * *', () => {
+    processReminders().catch((err) => logger.error('jobs', 'processReminders threw', err));
+  });
 
   // Fire the first sync immediately on startup so data is fresh right away.
   setTimeout(() => {
@@ -70,10 +100,10 @@ export function startScheduler() {
 
   logger.info(
     'jobs',
-    `Scheduler started. cricket=[${config.cron.cricket}] liveRefresh=[${config.cron.liveRefresh || 'off'}] news=[${config.cron.news}] cleanup=[${config.cron.cleanup}]`,
+    `Scheduler started. cricket=[${config.cron.cricket}] liveRefresh=[${config.cron.liveRefresh || 'off'}] news=[${config.cron.news}] cleanup=[${config.cron.cleanup}] reminders=[every minute]`,
   );
 
-  return { cricketTask, liveTask, newsTask, cleanupTask, syncNow: cricketSync, newsNow: newsSync };
+  return { cricketTask, liveTask, newsTask, cleanupTask, reminderTask, syncNow: cricketSync, newsNow: newsSync };
 }
 
 export async function manualSyncCricket() {

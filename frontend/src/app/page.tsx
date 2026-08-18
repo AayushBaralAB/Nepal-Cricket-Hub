@@ -26,6 +26,8 @@ import { TeamAvatar } from '@/components/ui/TeamAvatar';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { AdSlot } from '@/components/ui/AdSlot';
 import { LiveBadge } from '@/components/ui/Badges';
+import { SocialFeed } from '@/components/social/SocialFeed';
+import { NotificationManager } from '@/components/notifications/NotificationManager';
 
 export const revalidate = 60;
 
@@ -314,6 +316,25 @@ export default async function HomePage() {
           </div>
         </section>
       )}
+
+      {/* ----------------------- SOCIAL FEED ----------------------- */}
+      <section aria-label="Social media">
+        <SectionHeader title="Follow Nepal Cricket" />
+        <SocialFeed />
+      </section>
+
+      {/* ----------------------- NOTIFICATIONS ----------------------- */}
+      <section aria-label="Notifications" className="card p-6">
+        <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:text-left">
+          <div className="flex-1">
+            <h3 className="font-display text-lg font-bold text-slate-900">Never Miss a Nepal Match</h3>
+            <p className="mt-1 text-sm text-slate-600">
+              Enable notifications to get live score alerts and match reminders for Nepal cricket.
+            </p>
+          </div>
+          <NotificationManager />
+        </div>
+      </section>
     </div>
   );
 }

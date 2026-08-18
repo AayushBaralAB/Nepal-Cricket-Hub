@@ -292,3 +292,42 @@ export interface LiveStream {
   platform: string;
   order: number;
 }
+
+export interface Photo {
+  _id?: string;
+  title: string;
+  url: string;
+  thumbnailUrl?: string;
+  caption?: string;
+  photographer?: string;
+  matchId?: string;
+  tags: string[];
+  uploadedAt: string;
+}
+
+export interface Prediction {
+  _id?: string;
+  matchId: string;
+  userIdentifier: string;
+  predictedWinner: string;
+  predictedScore?: number;
+  predictedManOfMatch?: string;
+  points?: number;
+  createdAt: string;
+}
+
+export interface PredictionStats {
+  totalVotes: number;
+  winnerVotes: Array<{ team: string; count: number; percentage: number }>;
+  avgPredictedScore: number;
+}
+
+export interface MatchReminder {
+  _id?: string;
+  matchId: string;
+  matchTitle: string;
+  userIdentifier: string;
+  remindBeforeMinutes: number;
+  notified: boolean;
+  createdAt: string;
+}

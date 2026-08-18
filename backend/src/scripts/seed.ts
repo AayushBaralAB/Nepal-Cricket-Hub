@@ -544,6 +544,27 @@ async function seed() {
   }
 
   logger.info('seed', `Seed complete. Teams=${TEAMS.length}, Series=${SERIES.length}, Players=${PLAYERS.length} (Men: ${PLAYERS.filter(p => p.teamId === NEPAL).length}, Women: ${PLAYERS.filter(p => p.teamId === NEPAL_W).length}, A: ${PLAYERS.filter(p => p.teamId === NEPAL_A).length}, U19: ${PLAYERS.filter(p => p.teamId === NEPAL_U19).length}, W U19: ${PLAYERS.filter(p => p.teamId === NEPAL_W_U19).length}, U16: ${PLAYERS.filter(p => p.teamId === NEPAL_U16).length}), Matches=${MATCHES.length}, News=${NEWS.length}.`);
+
+  const PHOTOS = [
+    { title: 'Nepal vs UAE - Match Action', url: 'https://placehold.co/800x600/1e3a5f/ffffff?text=Nepal+vs+UAE', thumbnailUrl: 'https://placehold.co/400x300/1e3a5f/ffffff?text=Nepal+vs+UAE', caption: 'Nepal batting in the tri-series', tags: ['match', 'odi'], uploadedAt: nowIso() },
+    { title: 'Rohit Paudel Cover Drive', url: 'https://placehold.co/800x600/2563eb/ffffff?text=Rohit+Paudel', thumbnailUrl: 'https://placehold.co/400x300/2563eb/ffffff?text=Rohit+Paudel', caption: 'Captain Rohit Paudel plays a cover drive', tags: ['player', 'match'], uploadedAt: nowIso() },
+    { title: 'Sandeep Lamichhane Bowling', url: 'https://placehold.co/800x600/059669/ffffff?text=Sandeep', thumbnailUrl: 'https://placehold.co/400x300/059669/ffffff?text=Sandeep', caption: 'Sandeep Lamichhane in action', tags: ['player', 'match'], uploadedAt: nowIso() },
+    { title: 'Nepal Team Celebration', url: 'https://placehold.co/800x600/dc2626/ffffff?text=Nepal+Celebration', thumbnailUrl: 'https://placehold.co/400x300/dc2626/ffffff?text=Nepal+Celebration', caption: 'Nepal team celebrates a wicket', tags: ['celebration', 'team'], uploadedAt: nowIso() },
+    { title: 'NPL Opening Ceremony', url: 'https://placehold.co/800x600/7c3aed/ffffff?text=NPL+Opening', thumbnailUrl: 'https://placehold.co/400x300/7c3aed/ffffff?text=NPL+Opening', caption: 'NPL 2025 opening ceremony at TU Ground', tags: ['npl', 'event'], uploadedAt: nowIso() },
+    { title: 'TU Cricket Ground', url: 'https://placehold.co/800x600/0891b2/ffffff?text=TU+Ground', thumbnailUrl: 'https://placehold.co/400x300/0891b2/ffffff?text=TU+Ground', caption: 'Tribhuvan University Cricket Ground, Kirtipur', tags: ['venue', 'ground'], uploadedAt: nowIso() },
+    { title: 'Nepal Women Training', url: 'https://placehold.co/800x600/be185d/ffffff?text=Nepal+Women', thumbnailUrl: 'https://placehold.co/400x300/be185d/ffffff?text=Nepal+Women', caption: 'Nepal Women team during practice session', tags: ['women', 'training'], uploadedAt: nowIso() },
+    { title: 'Kushal Bhurtel Celebration', url: 'https://placehold.co/800x600/ca8a04/ffffff?text=Kushal', thumbnailUrl: 'https://placehold.co/400x300/ca8a04/ffffff?text=Kushal', caption: 'Kushal Bhurtel celebrates century', tags: ['player', 'celebration'], uploadedAt: nowIso() },
+    { title: 'Nepal vs Scotland T20', url: 'https://placehold.co/800x600/4338ca/ffffff?text=Nepal+vs+Scotland', thumbnailUrl: 'https://placehold.co/400x300/4338ca/ffffff?text=Nepal+vs+Scotland', caption: 'T20 World Cup qualifier match', tags: ['match', 't20'], uploadedAt: nowIso() },
+    { title: 'Nepal U19 Squad', url: 'https://placehold.co/800x600/15803d/ffffff?text=U19+Squad', thumbnailUrl: 'https://placehold.co/400x300/15803d/ffffff?text=U19+Squad', caption: 'Nepal U19 team group photo', tags: ['u19', 'team'], uploadedAt: nowIso() },
+  ];
+
+  for (const photo of PHOTOS) {
+    const existing = await db.collection('photos').findOne({ title: photo.title });
+    if (!existing) {
+      await db.collection('photos').insertOne({ ...photo, createdAt: nowIso() });
+    }
+  }
+  logger.info('seed', `Gallery seeded: ${PHOTOS.length} photos.`);
 }
 
 seed()

@@ -19,6 +19,8 @@ const NAV_LINKS = [
 ];
 
 const UTILITY_LINKS = [
+  { href: '/gallery', label: 'Gallery' },
+  { href: '/predictions', label: 'Predict' },
   { href: '/videos', label: 'Videos' },
   { href: '/series', label: 'Series' },
   { href: '/contact', label: 'Contact' },

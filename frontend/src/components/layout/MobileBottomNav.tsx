@@ -16,6 +16,8 @@ const MORE = [
   { href: '/teams', label: 'Teams' },
   { href: '/players', label: 'Players' },
   { href: '/points-table', label: 'Points Table' },
+  { href: '/predictions', label: 'Predict Matches' },
+  { href: '/gallery', label: 'Photo Gallery' },
   { href: '/series/nepal-premier-league-2025', label: 'NPL 2025' },
   { href: '/news', label: 'News Categories' },
   { href: '/videos', label: 'Videos' },
