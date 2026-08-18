@@ -18,6 +18,7 @@ function StreamCard({ stream }: { stream: LiveStream }) {
           allowFullScreen
           referrerPolicy="strict-origin-when-cross-origin"
           sandbox="allow-scripts allow-same-origin allow-popups"
+          style={{ border: 0, pointerEvents: 'none' }}
         />
       </div>
       <div className="flex items-center gap-2 border-t border-slate-100 bg-slate-50 px-4 py-2.5">

@@ -127,10 +127,34 @@ export class CricbuzzProvider implements CricketProvider {
   /** Get matches specifically involving Nepal. */
   async getNepalMatches(): Promise<CricketMatch[]> {
     try {
+      // First try the Nepal-specific schedule endpoint
+      const scheduleMatches = await this.fetchNepalSchedule().catch(() => []);
+      if (scheduleMatches.length) return scheduleMatches;
+
+      // Fallback to homepage filtering
       const data = await this.fetchHomepage();
       return data.filter(isNepalMatch);
     } catch (err) {
       logger.warn('cricbuzz', 'Failed to fetch Nepal matches', err);
+      return [];
+    }
+  }
+
+  /**
+   * Fetch Nepal's schedule from Cricbuzz's team schedule endpoint.
+   * Nepal team ID on Cricbuzz is 72.
+   */
+  private async fetchNepalSchedule(): Promise<CricketMatch[]> {
+    try {
+      const res = await this.client.get('/html/schedule/nepal-72/schedule');
+      const body = res.data;
+
+      if (typeof body === 'string') {
+        return this.parseHtmlMatches(body);
+      }
+      return this.parseJsonHomepage(body);
+    } catch (err) {
+      logger.warn('cricbuzz', 'Failed to fetch Nepal schedule', err);
       return [];
     }
   }

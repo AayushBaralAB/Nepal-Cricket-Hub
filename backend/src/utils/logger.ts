@@ -15,7 +15,7 @@ export function log(entry: LogEntry) {
   else if (entry.level === 'warn') console.warn(line);
   else console.log(line);
 
-  if (!db.isConfigured) return;
+  if (!db.isConfigured || !db.isConnected) return;
   db.collection('api_logs')
     .insertOne({
       source: entry.source,
