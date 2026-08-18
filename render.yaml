@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: crickethub-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install && npm run build
+    startCommand: node dist/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: CRICKET_PROVIDER
+        value: cricbuzz
+      - key: MONGO_URL
+        sync: false
+      - key: MONGO_DB_NAME
+        value: nepal_cricket_hub
+      - key: CORS_ORIGIN
+        value: https://nepal-cricket-hub.vercel.app
+      - key: ADMIN_API_TOKEN
+        generateValue: true
+      - key: CRON_CRICKET
+        value: "0 */6 * * *"
+      - key: CRON_LIVE_REFRESH
+        value: "30 */2 * * *"
