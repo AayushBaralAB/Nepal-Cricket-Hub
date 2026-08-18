@@ -196,6 +196,7 @@ export class CricketDataService {
 
   private async syncTeams() {
     const teams = await this.provider.getTeams();
+    if (!teams.length) return;
     this.cacheTeams = teams;
     if (!db.isConfigured) return;
     const ops = teams.map((t) => ({
@@ -217,6 +218,7 @@ export class CricketDataService {
 
   private async syncSeries() {
     const series = await this.provider.getSeries();
+    if (!series.length) return;
     this.cacheSeries = series;
     if (!db.isConfigured) return;
     const ops = series.map((s) => ({
@@ -238,6 +240,7 @@ export class CricketDataService {
 
   private async syncPlayers() {
     const players = await this.provider.getPlayers();
+    if (!players.length) return;
     this.cachePlayers = players;
     if (!db.isConfigured) return;
     const ops = players.map((p) => ({
@@ -416,7 +419,20 @@ export class CricketDataService {
         status: s.status ? String(s.status) : undefined,
         pointsTableAvailable: Boolean(s.pointsTableAvailable),
       }));
-      logger.info('cricket', `Cache primed from database (${this.cacheMatches.length} matches)`);
+      const players = await db.collection('players').find().toArray();
+      this.cachePlayers = players.map((p) => ({
+        externalId: String(p.externalId ?? p._id),
+        name: String(p.name ?? ''),
+        slug: String(p.slug ?? ''),
+        fullName: p.fullName ? String(p.fullName) : undefined,
+        photoUrl: p.photoUrl ? String(p.photoUrl) : undefined,
+        country: p.country ? String(p.country) : undefined,
+        role: p.role ? String(p.role) : undefined,
+        battingStyle: p.battingStyle ? String(p.battingStyle) : undefined,
+        bowlingStyle: p.bowlingStyle ? String(p.bowlingStyle) : undefined,
+        teamId: p.teamId ? String(p.teamId) : undefined,
+      }));
+      logger.info('cricket', `Cache primed from database (${this.cacheMatches.length} matches, ${this.cacheTeams.length} teams, ${this.cachePlayers.length} players)`);
     } catch (err) {
       logger.warn('cricket', 'Failed to prime cache from database', err);
     }
