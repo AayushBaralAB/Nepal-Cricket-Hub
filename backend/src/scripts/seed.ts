@@ -505,11 +505,11 @@ async function seed() {
 
   // Live streams (YouTube embeds — inline, no outbound links, no channel branding)
   const LIVE_STREAMS = [
-    { title: "Men's T20 World Cup 2026 LIVE", videoId: 'mhEoBlRqfaE', order: 1 },
-    { title: "Men's T20 World Cup 2026 LIVE", videoId: 'iHT48AVOQ80', order: 2 },
-    { title: "Men's T20 World Cup 2026 LIVE", videoId: 're9P6hmJ_sY', order: 3 },
-    { title: "Men's T20 World Cup 2026 LIVE", videoId: 'iOid998g1eI', order: 4 },
-    { title: "Men's T20 World Cup 2026 LIVE", videoId: 'M7-F_oMl7nk', order: 5 },
+    { title: 'Nepal vs UAE Live', videoId: 'mhEoBlRqfaE', order: 1 },
+    { title: 'Nepal vs Oman Live', videoId: 'iHT48AVOQ80', order: 2 },
+    { title: 'Nepal vs Scotland Live', videoId: 're9P6hmJ_sY', order: 3 },
+    { title: 'Nepal vs Netherlands Live', videoId: 'iOid998g1eI', order: 4 },
+    { title: 'Nepal vs USA Live', videoId: 'M7-F_oMl7nk', order: 5 },
   ];
   for (const stream of LIVE_STREAMS) {
     await db.collection('live_streams').updateOne(

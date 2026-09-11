@@ -32,10 +32,12 @@ export function TeamAvatar({
   name,
   logoUrl,
   size = 40,
+  className = '',
 }: {
   name: string;
   logoUrl?: string;
   size?: number;
+  className?: string;
 }) {
   const gradient = TEAM_COLORS[name] ?? DEFAULT_GRADIENT;
 
@@ -47,7 +49,7 @@ export function TeamAvatar({
         alt={`${name} logo`}
         width={size}
         height={size}
-        className="rounded-full border border-slate-200 object-contain bg-white"
+        className={`rounded-full border border-slate-200 object-contain bg-white ${className}`}
         style={{ width: size, height: size }}
         loading="lazy"
       />
@@ -56,7 +58,7 @@ export function TeamAvatar({
 
   return (
     <div
-      className={`flex shrink-0 items-center justify-center rounded-full font-display font-black ${gradient}`}
+      className={`flex shrink-0 items-center justify-center rounded-full font-display font-black ${gradient} ${className}`}
       style={{ width: size, height: size, fontSize: size * 0.36 }}
       aria-hidden="true"
     >
