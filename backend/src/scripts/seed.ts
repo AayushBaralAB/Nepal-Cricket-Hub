@@ -64,22 +64,27 @@ const NEPAL_U19 = TEAMS[2].externalId;
 const NEPAL_A = TEAMS[3].externalId;
 const NEPAL_W_U19 = TEAMS[4].externalId;
 const NEPAL_U16 = TEAMS[5].externalId;
-const UAE = TEAMS[8].externalId;
-const OMA = TEAMS[9].externalId;
-const NAM = TEAMS[11].externalId;
-const ZIM = TEAMS[12].externalId;
-const WI = TEAMS[13].externalId;
-const SCO = TEAMS[14].externalId;
-const USA_SLUG = TEAMS[15].externalId;
-const NED = TEAMS[16].externalId;
-const JKB = TEAMS[17].externalId;
-const BRK = TEAMS[18].externalId;
-const KAR = TEAMS[19].externalId;
-const PKA = TEAMS[20].externalId;
-const CHT = TEAMS[21].externalId;
-const LBL = TEAMS[22].externalId;
-const SDR = TEAMS[23].externalId;
-const KTM = TEAMS[24].externalId;
+const IND = TEAMS[6].externalId;
+const PAK = TEAMS[7].externalId;
+const SL = TEAMS[8].externalId;
+const BAN = TEAMS[9].externalId;
+const AFG = TEAMS[10].externalId;
+const UAE = TEAMS[11].externalId;
+const OMA = TEAMS[12].externalId;
+const NAM = TEAMS[13].externalId;
+const ZIM = TEAMS[14].externalId;
+const WI = TEAMS[15].externalId;
+const SCO = TEAMS[16].externalId;
+const USA_SLUG = TEAMS[17].externalId;
+const NED = TEAMS[18].externalId;
+const JKB = TEAMS[19].externalId;
+const BRK = TEAMS[20].externalId;
+const KAR = TEAMS[21].externalId;
+const PKA = TEAMS[22].externalId;
+const CHT = TEAMS[23].externalId;
+const LBL = TEAMS[24].externalId;
+const SDR = TEAMS[25].externalId;
+const KTM = TEAMS[26].externalId;
 
 const PLAYERS: SeedPlayer[] = [
   // ═══════════════════════════════════════════════════════════════════
@@ -245,6 +250,7 @@ const SERIES = [
   { externalId: '20000000-0000-0000-0000-000000000007', name: 'ICC CWC League 2 — Nepal/UAE/Oman', slug: 'cwcl2-nepal-uae-oman-2026', type: 'International', category: 'ICC CWC League 2', startDate: '2026-04-25', endDate: '2026-05-05', season: '2026', status: 'completed', pointsTableAvailable: true },
   { externalId: '20000000-0000-0000-0000-000000000008', name: 'ICC CWC League 2 — Nepal/Scotland/USA', slug: 'cwcl2-nepal-scotland-usa-2026', type: 'International', category: 'ICC CWC League 2', startDate: '2026-05-12', endDate: '2026-05-22', season: '2026', status: 'completed', pointsTableAvailable: true },
   { externalId: '20000000-0000-0000-0000-000000000009', name: 'ICC CWC League 2 — Nepal/Netherlands/Namibia', slug: 'cwcl2-nepal-netherlands-namibia-2026', type: 'International', category: 'ICC CWC League 2', startDate: '2026-07-21', endDate: '2026-07-31', season: '2026', status: 'completed', pointsTableAvailable: true },
+  { externalId: '20000000-0000-0000-0000-000000000010', name: 'ACC Men\'s Premier Cup 2026', slug: 'acc-mens-premier-cup-2026', type: 'International', category: 'ACC Premier Cup', startDate: '2026-09-06', endDate: '2026-09-12', season: '2026', status: 'ongoing', pointsTableAvailable: false },
 ];
 
 const NPL_SERIES = SERIES[0].externalId;
@@ -252,6 +258,7 @@ const T20WC = SERIES[1].externalId;
 const CWCL2_UOE = SERIES[2].externalId;
 const CWCL2_SUA = SERIES[3].externalId;
 const CWCL2_NNL = SERIES[4].externalId;
+const APC = SERIES[5].externalId;
 
 // [seriesId, teamExternalId, matches, wins, losses, noResult, ties, points, nrr, position]
 const POINTS: Array<[string, string, number, number, number, number, number, number, number, number]> = [
@@ -298,6 +305,9 @@ const MATCHES: SeedMatch[] = [
   // ─── Upcoming Nepal matches ─────────────────────────────────
   ['UP-1001', CWCL2_NNL, NEPAL, UAE, 'Nepal vs UAE', 'nepal-vs-uae-oct-2026', 'ODI', 'Al Amerat Cricket Ground', 'Muscat', '2026-10-08T04:00:00.000Z', 'upcoming', null, null, null, null, false, null, null],
   ['UP-1002', CWCL2_NNL, NEPAL, OMA, 'Nepal vs Oman', 'nepal-vs-oman-oct-2026', 'ODI', 'Al Amerat Cricket Ground', 'Muscat', '2026-10-12T04:00:00.000Z', 'upcoming', null, null, null, null, false, null, null],
+
+  // ─── ACC Men's Premier Cup 2026 — Final (Bayuemas Oval, KL) ─
+  ['APC-F01', APC, NEPAL, UAE, 'Nepal vs UAE', 'nepal-vs-uae-acc-premier-cup-final', 'T20', 'Bayuemas Oval', 'Kuala Lumpur', '2026-09-12T03:00:00.000Z', 'upcoming', 'ACC Men\'s Premier Cup 2026 — Final', null, null, null, false, null, null],
 ];
 
 const NEWS = [
