@@ -91,8 +91,8 @@ export default async function HomePage() {
       {/* ───────────── HERO ───────────── */}
       <section aria-label="Welcome" className="bg-navy-gradient relative overflow-hidden">
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-nch-600/20 blur-3xl" />
-          <div className="absolute -bottom-32 right-0 h-80 w-80 rounded-full bg-saffron-500/10 blur-3xl" />
+          <div className="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-nch-600/20 blur-2xl" />
+          <div className="absolute -bottom-32 right-0 h-80 w-80 rounded-full bg-saffron-500/10 blur-2xl" />
           <div className="absolute left-1/2 top-0 h-px w-2/3 -translate-x-1/2 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
         </div>
 
