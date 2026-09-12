@@ -14,7 +14,7 @@ import {
   getTopWicketTakers,
   getVideos,
 } from '@/lib/api';
-import type { CricketMatch, NewsItem } from '@/lib/types';
+import type { CricketMatch } from '@/lib/types';
 import { formatDateTime, formatDate, formatTime } from '@/lib/format';
 import { LiveStrip } from '@/components/match/LiveStrip';
 import { MatchCard } from '@/components/match/MatchCard';
@@ -28,13 +28,14 @@ import { LiveBadge } from '@/components/ui/Badges';
 import { SocialFeed } from '@/components/social/SocialFeed';
 import { NotificationManager } from '@/components/notifications/NotificationManager';
 import { MatchCountdown } from '@/components/home/MatchCountdown';
+import { CricwavesScoreBox, CricwavesStrip } from '@/components/live/LiveScoresWidget';
 
 export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: 'CricketHub — Live Scores, News & Stats for Nepal Cricket',
   description:
-    'Live scores, fixtures, results, automatic Nepal cricket news, NPL coverage, player statistics and points tables — all Nepal cricket in one hub.',
+    'Live cricket scores, fixtures, results, automatic Nepal cricket news, NPL coverage, player statistics and points tables — all Nepal cricket in one hub.',
   openGraph: {
     type: 'website',
     url: '/',
@@ -68,13 +69,26 @@ export default async function HomePage() {
   );
   const nplTeams = (teams ?? []).filter((t) => t.teamType === 'NPL');
   const schedule = (upcoming ?? []).slice(0, 6);
+  const nepalUpcoming = (upcoming ?? []).filter(
+    (m) => m.homeTeam?.toLowerCase() === 'nepal' || m.awayTeam?.toLowerCase() === 'nepal',
+  );
+  const next = (upcoming ?? []).find(
+    (m) => m.homeTeam?.toLowerCase() === 'nepal' || m.awayTeam?.toLowerCase() === 'nepal',
+  );
   const nepalPlayers = (players ?? []).filter((p) => p.country === 'Nepal').slice(0, 8);
   const displayVideos = videos ?? [];
-  const next = (upcoming ?? []).find((m) => m.status === 'upcoming') ?? (upcoming ?? [])[0];
+  const hasLive = (live ?? []).length > 0;
 
   return (
     <div>
-      {/* ───────────────── HERO ───────────────── */}
+      {/* ───────────── LIVE SCORE TICKER (top) ───────────── */}
+      <div className="border-b border-slate-100 bg-white">
+        <div className="container-nch py-2">
+          <CricwavesStrip />
+        </div>
+      </div>
+
+      {/* ───────────── HERO ───────────── */}
       <section aria-label="Welcome" className="bg-navy-gradient relative overflow-hidden">
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-nch-600/20 blur-3xl" />
@@ -82,25 +96,25 @@ export default async function HomePage() {
           <div className="absolute left-1/2 top-0 h-px w-2/3 -translate-x-1/2 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
         </div>
 
-        <div className="container-nch relative grid gap-10 py-14 sm:py-20 lg:grid-cols-[1.1fr_1fr] lg:items-center lg:gap-16">
+        <div className="container-nch relative grid gap-10 py-12 sm:py-16 lg:grid-cols-[1.1fr_1fr] lg:items-center lg:gap-14">
           <div className="animate-fade-in-up">
             <span className="overline-label !text-nch-300">
               <span className="bg-white/10 px-2 py-0.5">Welcome to CricketHub</span>
             </span>
             <h1 className="mt-4 font-display text-4xl font-black leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-6xl">
-              Nepal&apos;s Cricket.
-              <span className="text-gradient-brand block pb-1">One Hub.</span>
+              Live Scores.
+              <span className="text-gradient-brand block pb-1">All Nepal Cricket.</span>
             </h1>
             <p className="mt-5 max-w-xl text-base leading-relaxed text-slate-300 sm:text-lg">
-              Live scores, fixtures and results, automatic news, NPL coverage and
+              Ball-by-ball international scores, Nepal fixtures, NPL coverage and
               player statistics — every ball, every boundary, all in one place.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <Link href="/live" className="btn-primary !px-6 !py-3 !text-base">
-                <span className="live-dot bg-white" /> Watch Live
+                <span className="live-dot bg-white" /> {hasLive ? 'Watch Live' : 'Live Centre'}
               </Link>
-              <Link href="/npl" className="btn-secondary !px-6 !py-3 !text-base">
-                Explore NPL
+              <Link href="/matches" className="btn-secondary !px-6 !py-3 !text-base">
+                All Matches
               </Link>
             </div>
           </div>
@@ -114,22 +128,58 @@ export default async function HomePage() {
       </section>
 
       <div className="container-nch space-y-14 py-10 sm:py-12">
-        {/* ───── LIVE ───── */}
-        {live && live.length > 0 && (
-          <section aria-labelledby="live-heading" className="-mt-0">
-            <div className="mb-4 flex items-center justify-between">
-              <h2 id="live-heading" className="section-title !mb-0">
-                <LiveBadge /> Live Now
+        {/* ───────────── LIVE SCORES HUB ───────────── */}
+        <section aria-label="Live scores" className="grid gap-6 lg:grid-cols-[340px_1fr]">
+          <div className="card overflow-hidden p-4">
+            <div className="mb-2 flex items-center justify-between px-1">
+              <h2 className="section-title !mb-0 text-sm">
+                <LiveBadge /> Live Cricket Scores
               </h2>
-              <Link href="/live" className="text-sm font-semibold text-nch-600 hover:text-nch-700">
-                All live →
-              </Link>
             </div>
-            <LiveStrip initial={live} />
-          </section>
-        )}
+            <div className="flex justify-center overflow-hidden rounded-xl">
+              <CricwavesScoreBox />
+            </div>
+            <p className="mt-2 px-1 text-[10px] leading-snug text-slate-400">
+              Live scores provided by Cricwaves. Auto-refreshes during matches.
+            </p>
+          </div>
 
-        {/* ───── FEATURED NEWS ───── */}
+          <div className="space-y-6">
+            <div>
+              <div className="mb-4 flex items-center justify-between">
+                <h2 id="live-nepal" className="section-title !mb-0">
+                  <LiveBadge /> Nepal Live
+                </h2>
+                <Link href="/live" className="text-sm font-semibold text-nch-600 hover:text-nch-700">
+                  Live centre →
+                </Link>
+              </div>
+              <LiveStrip initial={live ?? []} />
+            </div>
+
+            {nepalUpcoming.length > 0 && (
+              <div>
+                <SectionHeader overline="Nepal" title="Upcoming Nepal Matches" href="/matches?nepal=true" />
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {nepalUpcoming.slice(0, 4).map((m) => <MatchCard key={m.externalId} match={m} />)}
+                </div>
+              </div>
+            )}
+
+            <div>
+              <SectionHeader overline="Results" title="Recent Results" href="/matches?status=completed" />
+              {results?.length ? (
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {results.slice(0, 6).map((m) => <MatchCard key={m.externalId} match={m} />)}
+                </div>
+              ) : (
+                <div className="card p-6 text-center text-sm text-slate-500">No recent results yet.</div>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* ───────────── FEATURED NEWS ───────────── */}
         {featured.length > 0 && (
           <section aria-label="Featured news">
             <SectionHeader overline="News" title="Top Stories" href="/news" />
@@ -146,10 +196,10 @@ export default async function HomePage() {
           </section>
         )}
 
-        {/* ───── AD ───── */}
+        {/* ───────────── AD ───────────── */}
         <AdSlot slot="home_top" />
 
-        {/* ───── MATCHES + SIDEBAR ───── */}
+        {/* ───────────── SCHEDULE + SIDEBAR ───────────── */}
         <div className="grid gap-8 lg:grid-cols-3">
           <div className="space-y-8 lg:col-span-2">
             <section aria-label="Upcoming matches">
@@ -160,17 +210,6 @@ export default async function HomePage() {
                 </div>
               ) : (
                 <div className="card p-6 text-center text-sm text-slate-500">No upcoming matches found.</div>
-              )}
-            </section>
-
-            <section aria-label="Recent results">
-              <SectionHeader overline="Results" title="Recent Results" href="/matches?status=completed" />
-              {results?.length ? (
-                <div className="grid gap-4 sm:grid-cols-2">
-                  {results.map((m) => <MatchCard key={m.externalId} match={m} />)}
-                </div>
-              ) : (
-                <div className="card p-6 text-center text-sm text-slate-500">No recent results yet.</div>
               )}
             </section>
 
@@ -213,7 +252,7 @@ export default async function HomePage() {
           </div>
         </div>
 
-        {/* ───── NPL ───── */}
+        {/* ───────────── NPL ───────────── */}
         <section aria-label="Nepal Premier League">
           <SectionHeader title="Nepal Premier League" href="/npl" />
           <div className="card overflow-hidden">
@@ -254,7 +293,7 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* ───── LATEST NEWS ───── */}
+        {/* ───────────── LATEST NEWS ───────────── */}
         <section aria-label="Latest Nepal cricket news">
           <SectionHeader overline="Latest" title="Latest Nepal Cricket News" href="/news" />
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -262,7 +301,7 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* ───── PLAYERS ───── */}
+        {/* ───────────── PLAYERS ───────────── */}
         <section aria-label="Player highlights">
           <SectionHeader overline="Players" title="Player Highlights" href="/players" />
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
@@ -272,7 +311,7 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* ───── STATS ───── */}
+        {/* ───────────── STATS ───────────── */}
         <div className="grid gap-8 lg:grid-cols-2">
           <section aria-label="Top run scorers">
             <SectionHeader title="Top Run Scorers" href="/npl#stats" />
@@ -284,7 +323,7 @@ export default async function HomePage() {
           </section>
         </div>
 
-        {/* ───── VIDEOS ───── */}
+        {/* ───────────── VIDEOS ───────────── */}
         {displayVideos.length > 0 && (
           <section aria-label="Cricket videos">
             <SectionHeader title="Cricket Videos" href="/videos" />
@@ -331,13 +370,13 @@ export default async function HomePage() {
           </section>
         )}
 
-        {/* ───── SOCIAL FEED ───── */}
+        {/* ───────────── SOCIAL FEED ───────────── */}
         <section aria-label="Social media">
           <SectionHeader title="Follow Nepal Cricket" />
           <SocialFeed />
         </section>
 
-        {/* ───── NOTIFICATIONS ───── */}
+        {/* ───────────── NOTIFICATIONS ───────────── */}
         <section aria-label="Notifications" className="card p-6">
           <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:text-left">
             <div className="flex-1">
